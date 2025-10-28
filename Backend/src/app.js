@@ -1,19 +1,17 @@
 const express=require('express');
 const app=express();
 
+// here i separetely created the get request for the server
+app.get("/user/:userid/:name", (req,res)=>{
+    console.log(req.params);
+    res.send({name:"Dhananjay", lastname:"Singh"});
+});
+// created the post request for the server
+app.post("/name",(req,res)=>{
+    console.log("Post request received");
+    res.send("Atul Pratapp Singh")
+});
 
-app.use("/name", (req,res)=>{
-    res.send("My name is Dhananjay Pratap Singh");
-});
-app.use("/age", (req,res)=>{
-    res.send("My age is 21");
-});
-app.use("/intro",(req,res)=>{
-    res.send("I am a student of Computer Science Engineering at GLBITM");
-});
-app.use("/default", (req,res)=>{
-  res.send("This server is rumming on the port 3000");
-});
 app.listen(3000, ()=>{
-    console.log("Server kaam kr ra hai on port 7000");
+    console.log("Server kaam kr ra hai on port 3000");
 });
