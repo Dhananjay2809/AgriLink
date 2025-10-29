@@ -1,39 +1,40 @@
-const express=require('express');
-const app=express();
-const {adminAuth}=require('./middlewares/auth');
+import express from 'express';
+import connectDB from './config/database.js';
+import User from './models/user.js';
 
-app.use("/admin",adminAuth);
-app.get("user",(req,res)=>{
-res.send("Get the all data from the api")
-});
-app.get("/admin/deletedata",(req,res)=>{
-    res.send("Admin deleted the data from the api")
-});
-app.use("/name",(req,res,next)=>{
-    console.log("To test the middelware");
-     next();
-    res.send("This is the first rersponse from the server");
-   
-    },
-    (req,res)=>{
-        console.log("Second middelware");
-        res.send("This is the second response from the server");
-        
-    }
-);
+const app = express();
 
+// Middleware to parse JSON data
+app.use(express.json());
 
-// here i separetely created the get request for the server
-app.get("/user/:userid/:name", (req,res)=>{
-    console.log(req.params);
-    res.send({name:"Dhananjay", lastname:"Singh"});
-});
-// created the post request for the server
-app.get("/name",(req,res)=>{
-    console.log("Post request received");
-    // res.send("Atul Pratapp Singh")
+// Signup route
+app.post("/signup", async (req, res) => {
+  try {
+    const user = new User({
+      firstname: "Dhananjay",
+      lastname: "Kumar",
+      username: "Dhananjay9211",
+      email: "atul@gmail.com",
+      password: "Dhanan@123",
+      age: 21
+    });
+
+    await user.save();
+    res.send("✅ User registered successfully");
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(500).send("❌ Error registering user");
+  }
 });
 
-app.listen(3000, ()=>{
-    console.log("Server kaam kr ra hai on port 3000");
-});
+// Connect DB and start server
+connectDB()
+  .then(() => {
+    console.log("✅ Database connected successfully");
+    app.listen(3000, () => {
+      console.log("🚀 Server running on port 3000");
+    });
+  })
+  .catch((err) => {
+    console.error("❌ Database connection failed:", err);
+  });
