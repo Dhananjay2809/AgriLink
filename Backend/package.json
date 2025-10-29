@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "dotenv": "^17.2.3",
+    "env": "^0.0.2",
     "express": "^5.1.0",
     "mongoose": "^8.19.2"
   },
@@ -7,6 +9,7 @@
   "version": "1.0.0",
   "description": "This is my the project of the Farmer and the trader link",
   "main": "index.js",
+  "type":"module",
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js"
