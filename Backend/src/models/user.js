@@ -1,4 +1,8 @@
 import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const userSchema = new mongoose.Schema(
   {
@@ -11,15 +15,11 @@ const userSchema = new mongoose.Schema(
     lastname: {
       type: String,
     },
-    username: {
-      type: String,
-      unique: true, // optional but recommended
-      trim: true,
-    },
+   
     email: {
       type: String,
       required: true,
-      unique: true, // to prevent duplicate emails
+      unique: true,   // to prevent duplicate emails
       lowercase: true, // ensures consistency
     },
     password: {
@@ -29,7 +29,6 @@ const userSchema = new mongoose.Schema(
     },
     age: {
       type: Number,
-      required: true,
       min: 1,
     },
   },
@@ -37,6 +36,20 @@ const userSchema = new mongoose.Schema(
     timestamps: true, // ✅ Correct placement (outside the field definitions)
   }
 );
+ userSchema.methods.getJwtToken=function(){
+    const user=this;
+    const token=jwt.sign({id:user._id}, process.env.JWT_SECRET,{
+        expiresIn:"1d"
+         });
+    return token;
+   
+ };
 
-const User = mongoose.model('User', userSchema);
-export default User;
+ userSchema.methods.validatePassword=async function(inputPassword){
+    const user=this;
+    const match=await bcrypt.compare(inputPassword,user.password);
+    return match;
+ }
+
+
+export const UserModel=mongoose.model("User", userSchema);

@@ -1,5 +1,5 @@
 import validator from 'validator';
-import User from '../models/user.js';
+import {UserModel} from '../models/user.js';
 
 
 export const validateSignupData = async (req) => {
@@ -26,7 +26,7 @@ export const validateSignupData = async (req) => {
   }
 
   // Optional: Check if email already exists
-  const existingUser = await User.findOne({ email });
+  const existingUser = await UserModel.findOne({ email });
   if (existingUser) {
     throw new Error("Email already registered");
   }
