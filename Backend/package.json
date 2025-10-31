@@ -1,15 +1,18 @@
 {
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.3",
     "env": "^0.0.2",
     "express": "^5.1.0",
-    "mongoose": "^8.19.2"
+    "mongoose": "^8.19.2",
+    "validator": "^13.15.20"
   },
   "name": "backend",
   "version": "1.0.0",
   "description": "This is my the project of the Farmer and the trader link",
   "main": "index.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js"
