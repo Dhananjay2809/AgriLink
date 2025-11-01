@@ -1,6 +1,7 @@
 import expess from 'express';
 import { userAuth } from '../middlewares/auth.js';
 import { UserModel } from '../models/user.js';
+import validator from 'validator';
 import bcrypt from 'bcryptjs';
 
 const profileRouter = expess.Router();
@@ -45,5 +46,39 @@ profileRouter.put('/profile/edit', userAuth, async (req, res) => {
    } catch (err) {
         return res.status(500).send({ error: err.message });
    }
+});
+// ab passwrd edit ka route bnaenge
+profileRouter.put('/profile/changePassword', userAuth, async (req, res) => {
+    const { password, newPassword , confirmPassword} = req.body;
+    try{
+        if(!password){
+            return res.status(400).send({message:"Current password is required"});
+        }
+        const isPasswordValid=await req.user.validatePassword(password);
+        if(isPasswordValid){
+            if(newPassword.toString()===password.toString()){
+                return res.status(400).send({message:"New password cannot be same as current password"});
+            }
+            if(newPassword.toString()!==confirmPassword.toString()){
+                return res.status(400).send({message:"New password and confirm password do not match"});
+    }
+           if(!validator.isStrongPassword(newPassword)){
+            return res.status(400).send({message:"Password shou ld be at least 8 characters long and include uppercase, lowercase, number and symbol"});
+           }
+              const hashedPassword=await bcrypt.hash(newPassword,8);
+              await UserModel.findByIdAndUpdate(req.user.id,{
+                password:hashedPassword
+                });
+        // ab new token store krenge cookie me and old token delete kr denge
+        res.clearCookie("token");
+        const newToken=await req.user.getJwtToken();
+        res.cookie("token",newToken);
+        res.status(200).send({message:"Password changed successfully"});
+        
+} 
+    }
+catch(err){
+        return res.status(500).send({ error: err.message });
+    }
 });
 export default profileRouter;
