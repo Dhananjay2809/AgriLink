@@ -15,7 +15,20 @@ const userSchema = new mongoose.Schema(
     lastname: {
       type: String,
     },
-   
+    username:{
+      type:String,
+      minlength:4,
+      maxlength:10
+    },
+    age:{
+        type:Number,
+        min:18,
+        max:120
+    },
+    gender:{
+        type:String,
+        enum:["male","female","other"]
+    },
     email: {
       type: String,
       required: true,
@@ -27,18 +40,34 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 6, // good practice
     },
-    age: {
-      type: Number,
-      min: 1,
-    },
+    role: {
+    type: String,
+    required: true,
+    enum: ["farmer", "trader"],
+    
   },
+   crops:{
+    type:[String],
+    enum:["chilli","potato","wheat","rice","maize","cotton","sugarcane","fruits","vegetables","pulses","oilseeds","tea","coffee"]
+  },
+    address: {
+      street: String,
+      city: String,
+      state: String,
+      country: String,
+  },
+  phoneNumber: {
+    type: String,
+    minlength: 10
+  },
+},
   {
     timestamps: true, // ✅ Correct placement (outside the field definitions)
   }
 );
  userSchema.methods.getJwtToken=function(){
     const user=this;
-    const token=jwt.sign({id:user._id}, process.env.JWT_SECRET,{
+    const token=jwt.sign({id:user._id, role:user.role}, process.env.JWT_SECRET,{
         expiresIn:"1d"
          });
     return token;

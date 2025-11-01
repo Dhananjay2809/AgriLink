@@ -11,9 +11,9 @@ const authRouter=express.Router();
 authRouter.post('/signup', async(req,res)=>{
     try{
         await validateSignupData(req);
-        const {firstname,email, password} =req.body;
+        const {firstname,email, password,role} =req.body;
         const hashedPassword=await bcrypt.hash(password,8);
-       const newUser=new UserModel({firstname,email,password:hashedPassword});
+       const newUser=new UserModel({firstname,email,password:hashedPassword,role});
         await newUser.save();
         res.send({
             message:"User registered successfully"
@@ -40,12 +40,18 @@ authRouter.post('/login' , async(req,res)=>{
         const token=await user.getJwtToken();
         res.cookie("token",token,{
             httpOnly:true,
-            secure:false
+            secure:false,
+            sameSite:"None",
+            maxAge:24*60*60*1000 //1 day
         });
         res.status(200).send({
-            message:"Login Successfull",
-            token,
-            user
+            message: "Login Successful",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role, 
+      } 
         });
        }
        else{
@@ -59,7 +65,7 @@ authRouter.post('/login' , async(req,res)=>{
 });
 
 // ab logout krenge uske liye direct cookie clear kr denge
-authRouter.post('/logout' , userAuth, (req,res)=>{
+authRouter.post('/logout',userAuth, (req,res)=>{
     res.clearCookie("token");
     res.send({message:"Logged out successfully"});
 });

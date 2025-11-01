@@ -1,12 +1,19 @@
+import cookieParser from 'cookie-parser';
+
 import jwt from 'jsonwebtoken';
+import { UserModel } from '../models/user.js';
 
 export const userAuth = async (req, res, next) => {
-    const token = req.cookies.token;
-    if (!token) {
-        return res.status(401).send("❌ Unauthorized: No token provided");
-    }
+    //token ko cookie se le rhe hai
     try {
-        const decodedMessage = jwt.verify(token, "Atul@123#213");
+          const token = req.cookies.token;
+
+    //if token nhi hai to unauthorized
+    if (!token) {
+        return res.status(401).send("Unauthorized: No token provided");
+     }
+        //token verify kr rhe hai
+        const decodedMessage = jwt.verify(token, process.env.JWT_SECRET);
          const { id } = decodedMessage;
          const user = { id }; // You can fetch more user details from DB if needed
          if(!user){
@@ -16,6 +23,6 @@ export const userAuth = async (req, res, next) => {
          next();
     } catch (err) {
         console.error("Error:", err.message);
-        return res.status(401).send("❌ Unauthorized: Invalid token");
+        return res.status(401).send("Unauthorized: Invalid token");
     }
 };

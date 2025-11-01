@@ -4,6 +4,7 @@ import connectDB from './config/database.js';
 import cookieParser from 'cookie-parser';
 import { userAuth } from './middlewares/auth.js';
 import  authRouter  from './routes/auth.js';
+import profileRouter from './routes/profile.js';
 export const app=express();
 app.use(cookieParser());
 
@@ -12,6 +13,7 @@ dotenv.config();
 app.use(express.json());
 //All routes will be here
 app.use('/', authRouter);
+app.use('/', profileRouter);
 // TO connect to the database and start the server
 connectDB()
   .then(() => {
