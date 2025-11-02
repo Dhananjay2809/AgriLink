@@ -19,3 +19,7 @@ Validates old password, enforces strength, updates to new hashed password, issue
 
 ✅ Delete User Route
 Deletes user from DB and clears auth cookie.
+// To upload the image and the video to the cloudinary
+✅ multer → handles file upload
+✅ cloudinary → connects to Cloudinary API
+✅ multer-storage-cloudinary → auto uploads to Cloudinary (no local folder)

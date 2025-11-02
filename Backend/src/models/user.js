@@ -60,6 +60,7 @@ const userSchema = new mongoose.Schema(
     type: String,
     minlength: 10
   },
+  
 },
   {
     timestamps: true, // ✅ Correct placement (outside the field definitions)
