@@ -1,0 +1,21 @@
+//Follwing routes i have completed in my project AgriLink
+✅ Signup Route
+User registration with password hashing and JWT issued.
+
+✅ Login Route
+Authenticates user, generates token, and sets cookie.
+
+✅ Logout Route
+Clears auth cookie and ends session.
+
+✅ Profile Check Route
+Returns logged-in user details using req.user.
+
+✅ Edit Profile Route
+Updates allowed profile fields (name, other non-blocked fields).
+
+✅ Update Password Route
+Validates old password, enforces strength, updates to new hashed password, issues new token.
+
+✅ Delete User Route
+Deletes user from DB and clears auth cookie.

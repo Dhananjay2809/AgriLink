@@ -3,7 +3,6 @@ import { userAuth } from '../middlewares/auth.js';
 import { UserModel } from '../models/user.js';
 import validator from 'validator';
 import bcrypt from 'bcryptjs';
-
 const profileRouter = expess.Router();
 // Get user profile
 profileRouter.get('/profile', userAuth, async (req, res) => {
@@ -54,7 +53,11 @@ profileRouter.put('/profile/changePassword', userAuth, async (req, res) => {
         if(!password){
             return res.status(400).send({message:"Current password is required"});
         }
-        const isPasswordValid=await req.user.validatePassword(password);
+        const user=await UserModel.findById(req.user.id);
+        if(!user){
+            return res.status(404).send({message:"User not found"});
+        }
+        const isPasswordValid=await user.validatePassword(password);
         if(isPasswordValid){
             if(newPassword.toString()===password.toString()){
                 return res.status(400).send({message:"New password cannot be same as current password"});
@@ -71,8 +74,11 @@ profileRouter.put('/profile/changePassword', userAuth, async (req, res) => {
                 });
         // ab new token store krenge cookie me and old token delete kr denge
         res.clearCookie("token");
-        const newToken=await req.user.getJwtToken();
-        res.cookie("token",newToken);
+        const newToken=await user.getJwtToken();
+        res.cookie("token",newToken,{
+            httpOnly:true,
+            secure:false
+        });
         res.status(200).send({message:"Password changed successfully"});
         
 } 
@@ -80,5 +86,20 @@ profileRouter.put('/profile/changePassword', userAuth, async (req, res) => {
 catch(err){
         return res.status(500).send({ error: err.message });
     }
+});
+profileRouter.delete('/profile/deleteuser',userAuth, async(req,res)=>{
+     try{
+        const userId=req.user.id;
+       
+        await UserModel.findByIdAndDelete(userId);
+        if(!userId){
+           return res.status(404).send({message:"User not found"});
+        }
+        res.clearCookie("token");
+
+        res.status(200).send({message:"User deleted successfully"});
+     } catch(err){
+        return res.status(500).send({ error: err.message });
+     }
 });
 export default profileRouter;
