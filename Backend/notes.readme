@@ -23,3 +23,5 @@ Deletes user from DB and clears auth cookie.
 ✅ multer → handles file upload
 ✅ cloudinary → connects to Cloudinary API
 ✅ multer-storage-cloudinary → auto uploads to Cloudinary (no local folder)
+
+✅ Post created successfully and delete post successfully

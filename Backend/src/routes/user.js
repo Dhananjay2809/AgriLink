@@ -35,5 +35,70 @@ userRouter.post('/user/posts/create',userAuth, upload.single('image'), async (re
         return res.status(500).send({ error: err.message });
     }
 });
+
+// to get my all the post 
+userRouter.get("/user/posts/myposts", userAuth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const myPosts = await PostModel.find({ userID: userId })
+      .sort({ createdAt: -1 }) // latest first
+      .populate("userID", "name email role"); 
+
+    res.status(200).send({
+      success: true,
+      totalPosts: myPosts.length,
+      myPosts
+    });
+
+  } catch (err) {
+    return res.status(500).send({ error: err.message });
+  }
+});
+
+//delete the post of the user who created and post anything
+//i created this delete post api but in the image is not deleted from the cloudinary
+userRouter.delete('/user/post/deletepost/:id', userAuth, async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const userId = req.user.id;
+
+    const post = await PostModel.findById(postId);
+    if (!post) {
+      return res.status(404).send({ message: "Post not found" });
+    }
+
+    if (post.userID.toString() !== userId) {
+      return res.status(403).send({ message: "Unauthorized to delete this post" });
+    }
+
+    await PostModel.findByIdAndDelete(postId);
+
+    return res.status(200).send({ message: "Post deleted successfully" });
+
+  } catch (err) {
+    return res.status(500).send({ error: err.message });
+  }
+});
+
+// to check the feed , to see all the post of the farmer/ traders
+
+userRouter.get('/user/posts/feed', userAuth, async(req,res)=>{
+     try{
+      const posts = await PostModel.find()
+      .populate("userID", "name email role")  // show basic user info
+      .sort({ createdAt: -1 });      // show the latest post 
+        res.status(200).send({
+      success: true,
+      totalPosts: posts.length,
+      posts
+    });
+     }catch(err){
+      return res.status(500).send({ error: err.message });
+     }
+
+});
+
+
 export default userRouter;
 

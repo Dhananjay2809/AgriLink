@@ -6,6 +6,7 @@ import { userAuth } from './middlewares/auth.js';
 import  authRouter  from './routes/auth.js';
 import profileRouter from './routes/profile.js';
 import userRouter from './routes/user.js';
+import requestRouter from './routes/request.js';
 export const app=express();
 app.use(cookieParser());
 
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use('/', authRouter);
 app.use('/', profileRouter);
 app.use('/',userRouter);
+app.use('/',requestRouter);
 // TO connect to the database and start the server
 connectDB()
   .then(() => {
