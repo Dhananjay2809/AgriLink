@@ -6,7 +6,7 @@ import validator from 'validator';
 import bcrypt from 'bcryptjs';
 const profileRouter = expess.Router();
 // Get user profile
-profileRouter.get('/profile', userAuth, async (req, res) => {
+ profileRouter.get('/profile', userAuth, async (req, res) => {
     try {
         const userId = req.user.id;
         const user = await UserModel.findById(userId).select('-password'); // Exclude password

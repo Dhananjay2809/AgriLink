@@ -1,4 +1,4 @@
-import { FollowRequestModel } from "../models/connectionRequest.js";
+import { FollowRequestModel } from "../../models/connectionRequest.js";
 
 export const sendFollowRequest = async (req, res) => {
   try {

@@ -1,5 +1,5 @@
-import { FollowRequestModel } from "../models/connectionRequest.js";
-import FollowerModel from "../models/follower.js";
+import { FollowRequestModel } from "../../models/connectionRequest.js";
+import FollowerModel from "../../models/follower.js";
 
 export const acceptFollowRequest = async (req, res) => {
   try {

@@ -1,5 +1,34 @@
 // Upcoming work for the project 
 1. ek problem solve krni hai password update  krne par newtoken store nhi ho rha hai   
+// ✅ Pending Features To Implement
 
-03/11/2025 
-1. follow request delete , check all follow request 
+// 1️⃣ Feed System
+//    → controllers/feed.js
+//    → routes/feed.js
+
+// 2️⃣ Like & Comment System
+//    → models/like.js
+//    → models/comment.js
+//    → controllers/like.js
+//    → controllers/comment.js
+
+// 3️⃣ Chat / Messaging (Socket.io)  //ye sbse end me bnani hai
+//    → models/chat.js
+//    → models/message.js
+//    → controllers/message.js
+//    → socket/ folder
+
+// 4️⃣ Notifications System
+//    → models/notification.js
+//    → controllers/notification.js
+
+// 5️⃣ Search Feature
+//    → Add search route in user.js OR create routes/search.js
+
+// 6️⃣ Admin Panel
+//    → middlewares/adminAuth.js
+//    → routes/admin.js
+
+// 7️⃣ Role-Based Permissions (Farmer / Trader)
+//    → Add "role" field in user model
+//    → Create middleware/checkRole.js

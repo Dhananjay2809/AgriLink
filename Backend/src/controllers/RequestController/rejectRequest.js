@@ -1,4 +1,4 @@
-import { FollowRequestModel } from "../models/connectionRequest.js";
+import { FollowRequestModel } from "../../models/connectionRequest.js";
 
 export const rejectFollowRequest = async(req,res)=>{
    try{
@@ -9,7 +9,7 @@ export const rejectFollowRequest = async(req,res)=>{
     if (!request) {
       return res.status(404).json({ message: "Follow request not found" });
     }
-    // only the receiver can reject the request
+    // only  receiver can reject the request
     if (request.toUserId.toString() !== loggedInUserId) {
       return res.status(403).json({ message: "You are not authorized to reject this request" });
     }

@@ -1,4 +1,4 @@
-import FollowerModel from "../models/follower.js";
+import FollowerModel from "../../models/follower.js";
 
 export const getMyFollowers = async (req, res) => {
   try {
@@ -7,7 +7,9 @@ export const getMyFollowers = async (req, res) => {
     const followers = await FollowerModel.find({ following: userId })
       .populate("follower", "firstname lastname username");
 
-    return res.status(200).json({ followers });
+    return res.status(200).json({ 
+        followersCount: followers.length,
+        followers });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

@@ -1,13 +1,13 @@
 import express from "express";
 import { userAuth } from "../middlewares/auth.js";
-import { sendFollowRequest } from "../controllers/sendRequest.js";
-import {acceptFollowRequest} from "../controllers/acceptRequests.js";
-import{rejectFollowRequest} from "../controllers/rejectRequest.js";
-import {cancelFollowRequest} from "../controllers/cancelRequest.js";
-import { pendingRequestsReceived } from "../controllers/pendingRequestReceived.js";
-import { pendingRequestsSent } from "../controllers/pendingRequestSend.js";
-import { getMyFollowers } from "../controllers/allFollowers.js";
-import { getMyFollowing } from "../controllers/allFollowing.js";
+import { sendFollowRequest } from "../controllers/RequestController/sendRequest.js";
+import {acceptFollowRequest} from "../controllers/RequestController/acceptRequests.js";
+import{rejectFollowRequest} from "../controllers/RequestController/rejectRequest.js";
+import {cancelFollowRequest} from "../controllers/RequestController/cancelRequest.js";
+import { pendingRequestsReceived } from "../controllers/RequestController/pendingRequestReceived.js";
+import { pendingRequestsSent } from "../controllers/RequestController/pendingRequestSend.js";
+import { getMyFollowers } from "../controllers/RequestController/allFollowers.js";
+import { getMyFollowing } from "../controllers/RequestController/allFollowing.js";
 
 
 const requestRouter = express.Router();

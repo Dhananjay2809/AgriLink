@@ -1,4 +1,4 @@
-import FollowerModel from "../models/follower.js";
+import FollowerModel from "../../models/follower.js";
 export const getMyFollowing = async (req, res) => {
   try {
     const userId = req.user.id;
