@@ -1,6 +1,7 @@
 import expess from 'express';
 import { userAuth } from '../middlewares/auth.js';
 import { UserModel } from '../models/user.js';
+import FollowerModel from '../models/follower.js';
 import validator from 'validator';
 import bcrypt from 'bcryptjs';
 const profileRouter = expess.Router();
@@ -12,7 +13,20 @@ profileRouter.get('/profile', userAuth, async (req, res) => {
         if (!user) {
             return res.status(404).send({ message: 'User not found' });
         }
-        res.status(200).send({ user });
+        const followers = await FollowerModel.find({ following: userId })
+      .populate('follower', 'name email') // show follower name & email
+      .select('follower');
+
+    // Fetch following (people the user follows)
+    const following = await FollowerModel.find({ follower: userId })
+      .populate('following', 'name email')
+      .select('following');
+        res.status(200).send({ user,
+              followersCount: followers.length,
+            followingCount: following.length,
+            followers: followers.map(f => f.follower),
+            following: following.map(f => f.following)
+        });
     } catch (err) {
         return res.status(500).send({ error: err.message });
     }

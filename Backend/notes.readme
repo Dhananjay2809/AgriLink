@@ -25,3 +25,7 @@ Deletes user from DB and clears auth cookie.
 ✅ multer-storage-cloudinary → auto uploads to Cloudinary (no local folder)
 
 ✅ Post created successfully and delete post successfully
+✅ Follow request send and accept route completed'
+✅ Follow request reject complete/ follow request cancel
+✅ Get the pending request-received/send/
+✅ Get the number of followers/ and the following

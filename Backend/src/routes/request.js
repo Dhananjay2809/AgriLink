@@ -4,6 +4,12 @@ import { sendFollowRequest } from "../controllers/sendRequest.js";
 import {acceptFollowRequest} from "../controllers/acceptRequests.js";
 import{rejectFollowRequest} from "../controllers/rejectRequest.js";
 import {cancelFollowRequest} from "../controllers/cancelRequest.js";
+import { pendingRequestsReceived } from "../controllers/pendingRequestReceived.js";
+import { pendingRequestsSent } from "../controllers/pendingRequestSend.js";
+import { getMyFollowers } from "../controllers/allFollowers.js";
+import { getMyFollowing } from "../controllers/allFollowing.js";
+
+
 const requestRouter = express.Router();
 
 
@@ -11,4 +17,13 @@ requestRouter.post("/follow/send/:id", userAuth, sendFollowRequest);
 requestRouter.post("/accept/request/:id",userAuth, acceptFollowRequest);
 requestRouter.post("/reject/request/:id",userAuth, rejectFollowRequest);
 requestRouter.post("/cancel/request/:id",userAuth, cancelFollowRequest);
+
+
+// to get all the followers/ following/ pendingrequests of an user
+requestRouter.get("/requests/pending",userAuth,pendingRequestsReceived);
+requestRouter.get("/requests/pending",userAuth,pendingRequestsSent);
+
+requestRouter.get("/followers/me", userAuth, getMyFollowers);
+requestRouter.get("/following/me", userAuth, getMyFollowing);
+
 export default requestRouter;
