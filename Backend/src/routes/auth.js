@@ -25,7 +25,7 @@ authRouter.post('/signup', async(req,res)=>{
     }
 });
 
-authRouter.post('/login' , async(req,res)=>{
+authRouter.post('/auth/login' , async(req,res)=>{
     const {email, password}=req.body;
     // pahle user ke email checck krenge db me hai ye nhi then password match krenge
     try{
