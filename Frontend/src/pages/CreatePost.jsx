@@ -5,7 +5,7 @@ import { useAuth } from "../authContext/AuthContext";
 
 const CreatePost = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [form, setForm] = useState({
     cropType: "",
     quantity: "",
@@ -30,7 +30,7 @@ const CreatePost = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
         setError("Image size should be less than 5MB");
         return;
       }
@@ -44,17 +44,8 @@ const CreatePost = () => {
     setError("");
 
     try {
-      console.log("🔄 Starting post creation...");
-      
       if (!image) {
         setError("Please select an image");
-        return;
-      }
-
-      // Check if user is still authenticated
-      if (!user) {
-        setError("Your session has expired. Please login again.");
-        setTimeout(() => navigate('/login'), 2000);
         return;
       }
 
@@ -67,25 +58,10 @@ const CreatePost = () => {
       formData.append('location', form.location);
       formData.append('description', form.description);
 
-      console.log("📤 Sending post data with cookies...");
-      const response = await createPost(formData);
-      console.log("✅ Post created successfully:", response.data);
-      
-      // Success - navigate to home
+      await createPost(formData);
       navigate("/");
-      
     } catch (err) {
-      console.error("💥 Post creation error:", err);
-      
-      if (err.response?.status === 401) {
-        setError("Your session has expired. Please login again.");
-        // Auto-logout and redirect
-        setTimeout(() => {
-          logout();
-        }, 2000);
-      } else {
-        setError(err.response?.data?.error || "Failed to create post. Please try again.");
-      }
+      setError(err.response?.data?.error || "Failed to create post");
     } finally {
       setLoading(false);
     }
@@ -138,7 +114,7 @@ const CreatePost = () => {
               )}
             </div>
 
-            {/* Rest of the form remains the same */}
+            {/* Crop Type */}
             <div>
               <label htmlFor="cropType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Crop Type *
@@ -160,6 +136,7 @@ const CreatePost = () => {
               </select>
             </div>
 
+            {/* Quantity and Price */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -193,6 +170,7 @@ const CreatePost = () => {
               </div>
             </div>
 
+            {/* Location */}
             <div>
               <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Location
@@ -208,6 +186,7 @@ const CreatePost = () => {
               />
             </div>
 
+            {/* Description */}
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Description
@@ -223,6 +202,7 @@ const CreatePost = () => {
               />
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}

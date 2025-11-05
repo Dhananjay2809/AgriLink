@@ -19,7 +19,7 @@ const Feed = () => {
     try {
       setLoading(true);
       const response = await getFeed();
-      console.log("📦 Feed response:", response);
+      console.log("Feed response:", response);
       setPosts(response.data.posts || []);
     } catch (err) {
       setError("Failed to load feed");
