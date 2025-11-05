@@ -1,10 +1,11 @@
-// LoginForm.jsx - Updated to match your backend response
 import { useState } from "react";
 import { loginUser } from "../api/auth";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../authContext/AuthContext";
 
 const LoginForm = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,25 +17,31 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("🎯 Login form submitted!");
     setLoading(true);
     setError("");
 
     try {
-      console.log("Sending login request:", form);
-      
+      console.log("🔄 Calling login API...");
       const res = await loginUser(form);
-      console.log("Login response:", res);
+      console.log("✅ API Response:", res.data);
       
-      // Your backend sends the user data directly, not nested in data.user
       if (res.data.message === "Login Successful") {
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+        console.log("🎉 Login successful! User:", res.data.user);
+        
+        // Update auth context
+        login(res.data.user);
+        console.log("🔑 AuthContext updated");
+        
+        // Navigate to home
         navigate("/");
+        console.log("🚀 Navigation called");
+        
       } else {
         setError(res.data.message || "Login failed");
       }
     } catch (err) {
-      console.error("Login error:", err);
-      // Your backend sends error in err.response.data.message
+      console.error("💥 Login error:", err);
       setError(err.response?.data?.message || err.response?.data?.error || "Login failed");
     } finally {
       setLoading(false);
@@ -46,7 +53,7 @@ const LoginForm = () => {
       <div className="w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow-sm sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
         <form className="space-y-6" onSubmit={handleSubmit}>
           <h5 className="text-xl font-medium text-gray-900 dark:text-white">
-            Sign in to our platform
+            Sign in to AgriLink
           </h5>
 
           {error && (

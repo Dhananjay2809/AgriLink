@@ -8,7 +8,7 @@ const authRouter=express.Router();
 
 //signup router ye new useer ko db me store krane ka route hai
  
-authRouter.post('/signup', async(req,res)=>{
+authRouter.post('/auth/signup', async(req,res)=>{
     try{
         await validateSignupData(req);
         const {firstname,email, password,role} =req.body;
