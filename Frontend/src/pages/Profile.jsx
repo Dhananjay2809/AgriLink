@@ -2,13 +2,40 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import EditProfile from "../components/EditProfile";
+import ProfileImageUpload from "../components/ProfileImageUpload"; // ADD THIS IMPORT
+import { useAuth } from "../authContext/AuthContext";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("profile");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showImageUploadModal, setShowImageUploadModal] = useState(false); // ADD THIS STATE
+
+  const handleProfileUpdate = (updatedUser) => {
+    // Refresh the profile data
+    fetchProfile();
+    // Update auth context if needed
+    if (updatedUser) {
+      login(updatedUser);
+    }
+  };
+
+  // ADD THIS FUNCTION FOR IMAGE UPLOAD
+  const handleImageUpdate = (updatedUser) => {
+    // Refresh the profile data
+    fetchProfile();
+    // Update auth context if needed
+    if (updatedUser) {
+      login(updatedUser);
+    }
+    // Close the image upload modal
+    setShowImageUploadModal(false);
+  };
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -46,6 +73,11 @@ const Profile = () => {
     }
   };
 
+  // ADD THIS FUNCTION TO HANDLE PROFILE IMAGE CLICK
+  const handleProfileImageClick = () => {
+    setShowImageUploadModal(true);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -73,48 +105,85 @@ const Profile = () => {
       <Navbar />
       
       <div className="max-w-4xl mx-auto py-8 px-4">
-        {/* Profile Header */}
+        {/* Profile Header - UPDATED WITH CLICKABLE PROFILE IMAGE */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center space-x-6">
-            <div className="w-24 h-24 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-              <span className="text-2xl font-bold text-green-600 dark:text-green-300">
-                {profile.user.firstname?.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                {profile.user.firstname} {profile.user.lastname || ""}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">{profile.user.email}</p>
-              <p className="text-gray-500 dark:text-gray-400 capitalize mt-1">
-                {profile.user.role}
-              </p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-6">
+              {/* CLICKABLE PROFILE IMAGE - REPLACED STATIC DIV */}
+              <div className="relative">
+                <div 
+                  onClick={handleProfileImageClick}
+                  className="cursor-pointer transition-transform hover:scale-105"
+                >
+                  {profile.user.profilePicture ? (
+                    <img
+                      src={profile.user.profilePicture}
+                      alt="Profile"
+                      className="w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-lg"
+                    />
+                  ) : (
+                    <div className="w-24 h-24 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center border-4 border-white dark:border-gray-800 shadow-lg">
+                      <span className="text-2xl font-bold text-green-600 dark:text-green-300">
+                        {profile.user.firstname?.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                {/* EDIT ICON OVERLAY */}
+                <div 
+                  onClick={handleProfileImageClick}
+                  className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700 transition-colors shadow-lg"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+              </div>
               
-              <div className="flex space-x-6 mt-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {profile.followersCount || 0}
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                  {profile.user.firstname} {profile.user.lastname || ""}
+                </h1>
+                <p className="text-gray-600 dark:text-gray-300 mt-1">{profile.user.email}</p>
+                <p className="text-gray-500 dark:text-gray-400 capitalize mt-1">
+                  {profile.user.role}
+                </p>
+                
+                <div className="flex space-x-6 mt-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {profile.followersCount || 0}
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">Followers</div>
                   </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">Followers</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {profile.followingCount || 0}
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {profile.followingCount || 0}
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">Following</div>
                   </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">Following</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {profile.user.crops?.length || 0}
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {profile.user.crops?.length || 0}
+                    </div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">Crops</div>
                   </div>
-                  <div className="text-sm text-gray-500 dark:text-gray-400">Crops</div>
                 </div>
               </div>
             </div>
+            
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+            >
+              Edit Profile
+            </button>
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs - KEEP YOUR EXISTING TABS CODE */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6">
           <div className="border-b border-gray-200 dark:border-gray-700">
             <nav className="flex -mb-px">
@@ -161,7 +230,7 @@ const Profile = () => {
             </nav>
           </div>
 
-          {/* Tab Content */}
+          {/* Tab Content - KEEP YOUR EXISTING TAB CONTENT */}
           <div className="p-6">
             {activeTab === "profile" && (
               <div className="space-y-6">
@@ -344,6 +413,24 @@ const Profile = () => {
             )}
           </div>
         </div>
+
+        {/* EDIT PROFILE MODAL */}
+        {showEditModal && profile && (
+          <EditProfile
+            user={profile.user}
+            onClose={() => setShowEditModal(false)}
+            onUpdate={handleProfileUpdate}
+          />
+        )}
+
+        {/* PROFILE IMAGE UPLOAD MODAL - ADD THIS */}
+        {showImageUploadModal && (
+          <ProfileImageUpload
+            onImageUpdate={handleImageUpdate}
+            currentImage={profile.user.profilePicture}
+            onClose={() => setShowImageUploadModal(false)}
+          />
+        )}
       </div>
     </div>
   );

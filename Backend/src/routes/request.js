@@ -20,8 +20,8 @@ requestRouter.post("/cancel/request/:id",userAuth, cancelFollowRequest);
 
 
 // to get all the followers/ following/ pendingrequests of an user
-requestRouter.get("/requests/pending",userAuth,pendingRequestsReceived);
-requestRouter.get("/requests/pending",userAuth,pendingRequestsSent);
+requestRouter.get("/requests/pending/received",userAuth,pendingRequestsReceived);
+requestRouter.get("/requests/pending/sent",userAuth,pendingRequestsSent);
 
 requestRouter.get("/followers/me", userAuth, getMyFollowers);
 requestRouter.get("/following/me", userAuth, getMyFollowing);

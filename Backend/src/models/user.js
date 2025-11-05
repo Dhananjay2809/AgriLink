@@ -60,6 +60,10 @@ const userSchema = new mongoose.Schema(
     type: String,
     minlength: 10
   },
+   profilePicture: {
+      type: String,
+      default: null
+    },
   
 },
   {

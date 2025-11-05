@@ -41,9 +41,25 @@ userRouter.get("/user/posts/myposts", userAuth, async (req, res) => {
   try {
     const userId = req.user.id;
 
+    console.log("🔍 Fetching posts for user ID:", userId);
+    console.log("🔍 User ID type:", typeof userId);
+
     const myPosts = await PostModel.find({ userID: userId })
-      .sort({ createdAt: -1 }) // latest first
+      .sort({ createdAt: -1 })
       .populate("userID", "name email role"); 
+
+    console.log("✅ Found posts:", myPosts.length);
+    
+    // Log each post to see what's being returned
+    myPosts.forEach((post, index) => {
+      console.log(`📦 Post ${index + 1}:`, {
+        id: post._id,
+        userID: post.userID,
+        cropType: post.cropType,
+        images: post.images,
+        createdAt: post.createdAt
+      });
+    });
 
     res.status(200).send({
       success: true,
@@ -52,6 +68,7 @@ userRouter.get("/user/posts/myposts", userAuth, async (req, res) => {
     });
 
   } catch (err) {
+    console.error("💥 Error fetching posts:", err);
     return res.status(500).send({ error: err.message });
   }
 });

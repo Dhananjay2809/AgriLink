@@ -13,6 +13,10 @@ const storage = new CloudinaryStorage({
     allowed_formats: ["jpg", "jpeg", "png"],
   },
 });
+// ✅ Upload or Replace Profile Picture
+
+
+
 // ab upload middleware ko use krke hum file upload kr skte hain
 // ye middleware hum routes me use krenge jaha hume file upload krni hai
 export const upload = multer({ storage });

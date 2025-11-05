@@ -19,7 +19,6 @@ const Feed = () => {
     try {
       setLoading(true);
       const response = await getFeed();
-      console.log("Feed response:", response);
       setPosts(response.data.posts || []);
     } catch (err) {
       setError("Failed to load feed");
@@ -43,7 +42,7 @@ const Feed = () => {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Welcome back, {user?.firstname}!
+                Welcome back, {user?.firstname || user?.name}!
               </h1>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
                 Here's what's happening in the agricultural market today.
@@ -58,7 +57,7 @@ const Feed = () => {
           </div>
         </div>
 
-        {/* Feed Section */}
+        {/* Rest of your feed content remains the same */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             Market Feed

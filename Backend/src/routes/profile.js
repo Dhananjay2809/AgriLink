@@ -4,6 +4,7 @@ import { UserModel } from '../models/user.js';
 import FollowerModel from '../models/follower.js';
 import validator from 'validator';
 import bcrypt from 'bcryptjs';
+import { upload } from '../middlewares/multer.js';
 const profileRouter = expess.Router();
 // Get user profile
  profileRouter.get('/profile', userAuth, async (req, res) => {
@@ -116,4 +117,58 @@ profileRouter.delete('/profile/deleteuser',userAuth, async(req,res)=>{
         return res.status(500).send({ error: err.message });
      }
 });
+profileRouter.put(
+  "/profile/upload-image",
+  userAuth,
+  upload.single("profileImage"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file provided" });
+      }
+
+      const userId = req.user.id;
+      const imageUrl = req.file.path; // Cloudinary gives file path directly
+
+      const updatedUser = await UserModel.findByIdAndUpdate(
+        userId,
+        { profilePicture: imageUrl },
+        { new: true }
+      ).select("-password");
+
+      res.json({
+        message: "Profile picture uploaded successfully",
+        imageUrl,
+        user: updatedUser
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+);
+
+// ✅ Delete Profile Picture
+// ❌ Remove Profile Picture (only from DB, not Cloudinary)
+profileRouter.delete('/profile/remove-image', userAuth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      userId,
+      { profilePic: null },
+      { new: true }
+    ).select("-password");
+
+    res.status(200).json({
+      message: "Profile picture removed successfully",
+      user: updatedUser
+    });
+
+  } catch (error) {
+    console.error("Remove image error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 export default profileRouter;

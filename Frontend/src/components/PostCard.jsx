@@ -21,7 +21,20 @@ const PostCard = ({ post, onDelete, showActions = false }) => {
     }
   };
 
-  const isOwner = user?.id === post.userID?._id;
+  // Get user info from populated userID field
+  const userInfo = post.userID;
+  const isOwner = user?.id === userInfo?._id;
+
+  // Get display name - handle both name and firstname fields
+  const getDisplayName = () => {
+    return userInfo?.name || userInfo?.firstname || 'Unknown User';
+  };
+
+  // Get first character for avatar
+  const getAvatarChar = () => {
+    const name = getDisplayName();
+    return name.charAt(0).toUpperCase();
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -30,15 +43,15 @@ const PostCard = ({ post, onDelete, showActions = false }) => {
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
             <span className="text-sm font-bold text-blue-600 dark:text-blue-300">
-              {post.userID?.name?.charAt(0) || post.userID?.firstname?.charAt(0) || 'U'}
+              {getAvatarChar()}
             </span>
           </div>
           <div>
             <h3 className="font-semibold text-gray-900 dark:text-white">
-              {post.userID?.name || post.userID?.firstname}
+              {getDisplayName()}
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
-              {post.userID?.role} • {new Date(post.createdAt).toLocaleDateString()}
+              {userInfo?.role} • {new Date(post.createdAt).toLocaleDateString()}
             </p>
           </div>
         </div>
@@ -47,7 +60,7 @@ const PostCard = ({ post, onDelete, showActions = false }) => {
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
+            className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50 px-3 py-1 border border-red-600 rounded text-sm"
           >
             {isDeleting ? "Deleting..." : "Delete"}
           </button>

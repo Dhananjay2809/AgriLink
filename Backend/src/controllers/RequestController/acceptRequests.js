@@ -12,8 +12,9 @@ export const acceptFollowRequest = async (req, res) => {
       return res.status(404).json({ message: "Follow request not found" });
     }
 
+    // FIX: Use .equals() instead of toString() comparison
     // Only the receiver can accept
-    if (request.toUserId.toString() !== loggedInUserId) {
+    if (!request.toUserId.equals(loggedInUserId)) {
       return res.status(403).json({ message: "You are not authorized to accept this request" });
     }
 
@@ -21,11 +22,11 @@ export const acceptFollowRequest = async (req, res) => {
       return res.status(400).json({ message: `Request already ${request.status}` });
     }
 
-    // ✅ Update follow request status
+    // Update follow request status
     request.status = "accepted";
     await request.save();
 
-    // ✅ Create follower relationship
+    //Create follower relationship
     await FollowerModel.create({
       follower: request.fromUserId,
       following: request.toUserId

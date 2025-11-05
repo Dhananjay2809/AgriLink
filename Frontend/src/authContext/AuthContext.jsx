@@ -15,6 +15,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -23,24 +24,35 @@ export const AuthProvider = ({ children }) => {
   const checkAuth = async () => {
     try {
       const storedUser = localStorage.getItem('user');
-      if (storedUser) {
+      const storedToken = localStorage.getItem('token'); // CHECK FOR TOKEN
+      
+      if (storedUser && storedToken) {
         const userData = JSON.parse(storedUser);
         setUser(userData);
-        console.log("User restored from localStorage:", userData);
+      } else if (storedUser && !storedToken) {
+        // User data exists but no token - this is the current broken state
+        console.warn('User data found but no authentication token');
+        // You might want to redirect to login or clear the broken state
+        // localStorage.removeItem('user');
+        // setUser(null);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
       localStorage.removeItem('user');
+      localStorage.removeItem('token'); // CLEAR TOKEN TOO
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const login = (userData) => {
-    console.log("Logging in user:", userData);
+  const login = (userData, token) => { // ADD TOKEN PARAMETER
     setUser(userData);
+    // ✅ CRITICAL: Save BOTH user data AND token
     localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('token', token); // SAVE THE TOKEN
+    setLoginSuccess(true);
+    // Hide success message after 3 seconds
+    setTimeout(() => setLoginSuccess(false), 3000);
   };
 
   const logout = async () => {
@@ -49,9 +61,10 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      console.log("Logging out user");
       setUser(null);
+      // ✅ Remove both user data AND token
       localStorage.removeItem('user');
+      localStorage.removeItem('token');
       window.location.href = '/login';
     }
   };
@@ -60,7 +73,9 @@ export const AuthProvider = ({ children }) => {
     user,
     login,
     logout,
-    loading
+    loading,
+    loginSuccess,
+    setLoginSuccess
   };
 
   return (

@@ -6,8 +6,11 @@ import Home from "./pages/Feed";
 import Profile from "./pages/Profile";
 import CreatePost from "./pages/CreatePost";
 import Followers from "./pages/Followers";
+import Network from "./pages/Network"; // ADD THIS IMPORT
 import Navbar from "./components/Navbar";
 import LoadingSpinner from "./components/LoadingSpinner";
+import PostCard from "./components/PostCard";
+import MyPosts from "./components/MyPosts";
 
 // SIMPLE Home component for testing
 const SimpleHome = () => {
@@ -118,10 +121,21 @@ function AppContent() {
             <CreatePost />
           </ProtectedRoute>
         } />
+        <Route path="/my-posts" element={
+          <ProtectedRoute>
+            <MyPosts />
+        </ProtectedRoute>} />
         <Route path="/followers" element={
           <ProtectedRoute>
             <Navbar />
             <Followers />
+          </ProtectedRoute>
+        } />
+        {/* ADD NETWORK ROUTE INSIDE ROUTES */}
+        <Route path="/network" element={
+          <ProtectedRoute>
+            <Navbar />
+            <Network />
           </ProtectedRoute>
         } />
         <Route path="*" element={<Navigate to="/" />} />

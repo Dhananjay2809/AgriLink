@@ -7,6 +7,7 @@ import  authRouter  from './routes/auth.js';
 import profileRouter from './routes/profile.js';
 import userRouter from './routes/user.js';
 import requestRouter from './routes/request.js';
+import searchRouter from './routes/searchUser.js';
 import cors from 'cors';
 
 export const app=express();
@@ -27,6 +28,7 @@ app.use('/', authRouter);
 app.use('/', profileRouter);
 app.use('/',userRouter);
 app.use('/',requestRouter);
+app.use('/',searchRouter);
 // TO connect to the database and start the server
 app.use((err, req, res, next) => {
   console.error(err.stack);

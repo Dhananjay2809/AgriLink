@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../authContext/AuthContext";
+import SearchModal from "./SearchModal";
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -14,6 +16,9 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700 sticky top-0 z-50">
+      {/* Success Message Banner */}
+      <LoginSuccessMessage />
+      
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
         <Link to="/" className="flex items-center space-x-3 rtl:space-x-reverse">
           <img src="/logo.png" className="h-8" alt="AgriLink Logo" />
@@ -21,6 +26,28 @@ const Navbar = () => {
         </Link>
         
         <div className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
+          {/* User Welcome Message */}
+          {user && (
+            <div className="hidden md:flex items-center space-x-2 mr-4">
+              <span className="text-sm text-gray-700 dark:text-gray-300">
+                Welcome, <strong>{user.firstname || user.name}</strong>
+              </span>
+            </div>
+          )}
+
+          {/* SEARCH BUTTON */}
+          {user && (
+            <button
+              onClick={() => setShowSearchModal(true)}
+              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              title="Search Users"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+          )}
+          
           <button 
             type="button" 
             className="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" 
@@ -28,7 +55,7 @@ const Navbar = () => {
           >
             <span className="sr-only">Open user menu</span>
             <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-              {user?.name?.charAt(0) || user?.firstname?.charAt(0) || 'U'}
+              {user?.firstname?.charAt(0) || user?.name?.charAt(0) || 'U'}
             </div>
           </button>
           
@@ -100,8 +127,9 @@ const Navbar = () => {
               </Link>
             </li>
             <li>
+              {/* UPDATED: Changed from /followers to /network */}
               <Link 
-                to="/followers" 
+                to="/network" 
                 className="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -117,10 +145,59 @@ const Navbar = () => {
                 Create Post
               </Link>
             </li>
+
+            {/* SEARCH LINK FOR MOBILE */}
+            {user && (
+              <li className="md:hidden">
+                <button
+                  onClick={() => {
+                    setShowSearchModal(true);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="block w-full text-left py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                >
+                  Search Users
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       </div>
+
+      {/* SEARCH MODAL */}
+      <SearchModal 
+        isOpen={showSearchModal} 
+        onClose={() => setShowSearchModal(false)} 
+      />
     </nav>
+  );
+};
+
+// Success Message Component
+const LoginSuccessMessage = () => {
+  const { loginSuccess, setLoginSuccess } = useAuth();
+
+  if (!loginSuccess) return null;
+
+  return (
+    <div className="bg-green-600 text-white py-2 px-4">
+      <div className="max-w-screen-xl mx-auto flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+          </svg>
+          <span className="font-medium">Login Successful! Welcome back.</span>
+        </div>
+        <button 
+          onClick={() => setLoginSuccess(false)}
+          className="text-green-200 hover:text-white"
+        >
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
+      </div>
+    </div>
   );
 };
 
