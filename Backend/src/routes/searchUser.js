@@ -1,4 +1,4 @@
-// Add this to your userRouter.js or create routes/search.js
+
 import express from 'express';
 import { userAuth } from '../middlewares/auth.js';
 import { UserModel } from '../models/user.js';
@@ -35,7 +35,6 @@ searchRouter.get('/search/users', userAuth, async (req, res) => {
         });
 
     } catch (err) {
-        console.error("💥 Search error:", err);
         return res.status(500).send({ error: err.message });
     }
 });

@@ -148,8 +148,8 @@ profileRouter.put(
   }
 );
 
-// ✅ Delete Profile Picture
-// ❌ Remove Profile Picture (only from DB, not Cloudinary)
+//Delete Profile Picture
+// Remove Profile Picture (only from DB, not Cloudinary)
 profileRouter.delete('/profile/remove-image', userAuth, async (req, res) => {
   try {
     const userId = req.user.id;
