@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import EditProfile from "../components/EditProfile";
 import ProfileImageUpload from "../components/ProfileImageUpload"; // ADD THIS IMPORT
 import { useAuth } from "../authContext/AuthContext";
+import ChatRoom from '../components/chatRoom'; // ADD THIS IMPORT
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [showEditModal, setShowEditModal] = useState(false);
   const [showImageUploadModal, setShowImageUploadModal] = useState(false); // ADD THIS STATE
+  const [chatUser, setChatUser] = useState(null); // ADD THIS STATE
 
   const handleProfileUpdate = (updatedUser) => {
     // Refresh the profile data
@@ -24,6 +26,15 @@ const Profile = () => {
       login(updatedUser);
     }
   };
+  // ADD THESE FUNCTIONS
+const handleOpenChat = (user) => {
+  console.log("Opening chat with:", user.name || user.firstname);
+  setChatUser(user);
+};
+
+const handleCloseChat = () => {
+  setChatUser(null);
+};
 
   // ADD THIS FUNCTION FOR IMAGE UPLOAD
   const handleImageUpdate = (updatedUser) => {
@@ -345,72 +356,98 @@ const Profile = () => {
             )}
 
             {activeTab === "followers" && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Followers ({profile.followers?.length || 0})
-                </h3>
-                {profile.followers && profile.followers.length > 0 ? (
-                  <div className="space-y-3">
-                    {profile.followers.map((follower, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                      >
-                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-bold text-blue-600 dark:text-blue-300">
-                            {follower.name?.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">
-                            {follower.name}
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {follower.email}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 dark:text-gray-400">No followers yet</p>
-                )}
+  <div>
+    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+      Followers ({profile.followers?.length || 0})
+    </h3>
+    {profile.followers && profile.followers.length > 0 ? (
+      <div className="space-y-3">
+        {profile.followers.map((follower, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-bold text-blue-600 dark:text-blue-300">
+                  {follower.name?.charAt(0).toUpperCase()}
+                </span>
               </div>
-            )}
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {follower.name}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {follower.email}
+                </p>
+              </div>
+            </div>
+            
+            {/* 🔥 ADD MESSAGE BUTTON HERE */}
+            <button
+  onClick={() => handleOpenChat(follower)}
+  className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 text-sm flex items-center space-x-1"
+>
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+  </svg>
+  <span>Message</span>
+</button>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p className="text-gray-500 dark:text-gray-400">No followers yet</p>
+    )}
+  </div>
+)}
 
-            {activeTab === "following" && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Following ({profile.following?.length || 0})
-                </h3>
-                {profile.following && profile.following.length > 0 ? (
-                  <div className="space-y-3">
-                    {profile.following.map((following, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
-                      >
-                        <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-bold text-green-600 dark:text-green-300">
-                            {following.name?.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">
-                            {following.name}
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {following.email}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 dark:text-gray-400">Not following anyone yet</p>
-                )}
+           {activeTab === "following" && (
+  <div>
+    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+      Following ({profile.following?.length || 0})
+    </h3>
+    {profile.following && profile.following.length > 0 ? (
+      <div className="space-y-3">
+        {profile.following.map((following, index) => (
+          <div
+            key={index}
+            className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <span className="text-sm font-bold text-green-600 dark:text-green-300">
+                  {following.name?.charAt(0).toUpperCase()}
+                </span>
               </div>
-            )}
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">
+                  {following.name}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {following.email}
+                </p>
+              </div>
+            </div>
+            
+            {/* 🔥 ADD MESSAGE BUTTON HERE TOO */}
+            <button
+              onClick={() => console.log("Open chat with:", following.name)}
+              className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 text-sm flex items-center space-x-1"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              <span>Message</span>
+            </button>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p className="text-gray-500 dark:text-gray-400">Not following anyone yet</p>
+    )}
+  </div>
+)}
           </div>
         </div>
 
@@ -420,6 +457,13 @@ const Profile = () => {
             user={profile.user}
             onClose={() => setShowEditModal(false)}
             onUpdate={handleProfileUpdate}
+          />
+        )}
+         {/* CHAT ROOM COMPONENT - ADDED THIS */}
+        {chatUser && (
+          <ChatRoom 
+            targetUser={chatUser} 
+            onClose={handleCloseChat} 
           />
         )}
 

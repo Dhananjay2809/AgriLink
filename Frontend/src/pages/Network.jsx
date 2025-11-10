@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import ChatRoom from '../components/chatRoom';
 import { 
   getPendingRequestsReceived, 
   getPendingRequestsSent, 
@@ -25,6 +26,9 @@ const Network = () => {
   const [sentRequests, setSentRequests] = useState([]);
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
+  
+  // Chat state
+  const [chatUser, setChatUser] = useState(null);
 
   // Add event listener for refresh events
   useEffect(() => {
@@ -132,6 +136,16 @@ const Network = () => {
         }, 1000);
       }
     }
+  };
+
+  // Add chat functions INSIDE the component
+  const handleOpenChat = (user) => {
+    console.log("Opening chat with:", user.firstname);
+    setChatUser(user);
+  };
+
+  const handleCloseChat = () => {
+    setChatUser(null);
   };
 
   const handleManualRefresh = () => {
@@ -350,24 +364,36 @@ const Network = () => {
                     {followers.map((follower) => (
                       <div
                         key={follower._id}
-                        className="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                        className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
                       >
-                        <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-bold text-green-600 dark:text-green-300">
-                            {follower.firstname?.charAt(0)?.toUpperCase() || 'U'}
-                          </span>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-bold text-green-600 dark:text-green-300">
+                              {follower.firstname?.charAt(0)?.toUpperCase() || 'U'}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              {follower.firstname} {follower.lastname || ''}
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {follower.email}
+                            </p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 capitalize">
+                              {follower.role}
+                            </p>
+                          </div>
                         </div>
-                        <div className="ml-4">
-                          <p className="font-medium text-gray-900 dark:text-white">
-                            {follower.firstname} {follower.lastname || ''}
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {follower.email}
-                          </p>
-                          <p className="text-xs text-gray-400 dark:text-gray-500 capitalize">
-                            {follower.role}
-                          </p>
-                        </div>
+                        {/* ADD MESSAGE BUTTON HERE */}
+                        <button
+                          onClick={() => handleOpenChat(follower)}
+                          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm flex items-center space-x-2"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                          </svg>
+                          <span>Message</span>
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -390,24 +416,36 @@ const Network = () => {
                     {following.map((follow) => (
                       <div
                         key={follow._id}
-                        className="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                        className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
                       >
-                        <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-bold text-purple-600 dark:text-purple-300">
-                            {follow.firstname?.charAt(0)?.toUpperCase() || 'U'}
-                          </span>
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                            <span className="text-sm font-bold text-purple-600 dark:text-purple-300">
+                              {follow.firstname?.charAt(0)?.toUpperCase() || 'U'}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              {follow.firstname} {follow.lastname || ''}
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {follow.email}
+                            </p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 capitalize">
+                              {follow.role}
+                            </p>
+                          </div>
                         </div>
-                        <div className="ml-4">
-                          <p className="font-medium text-gray-900 dark:text-white">
-                            {follow.firstname} {follow.lastname || ''}
-                          </p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {follow.email}
-                          </p>
-                          <p className="text-xs text-gray-400 dark:text-gray-500 capitalize">
-                            {follow.role}
-                          </p>
-                        </div>
+                        {/* ADD MESSAGE BUTTON HERE TOO */}
+                        <button
+                          onClick={() => handleOpenChat(follow)}
+                          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm flex items-center space-x-2"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                          </svg>
+                          <span>Message</span>
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -420,6 +458,14 @@ const Network = () => {
             )}
           </div>
         </div>
+
+        {/* Chat Room Component */}
+        {chatUser && (
+          <ChatRoom 
+            targetUser={chatUser} 
+            onClose={handleCloseChat} 
+          />
+        )}
       </div>
     </div>
   );

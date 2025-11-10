@@ -1,17 +1,22 @@
 import express from 'express';
 import dotenv from 'dotenv';
+import http from 'http';
 import connectDB from './config/database.js';
 import cookieParser from 'cookie-parser';
+import initialiseSocket from './utils/socket.js';
 import { userAuth } from './middlewares/auth.js';
 import  authRouter  from './routes/auth.js';
 import profileRouter from './routes/profile.js';
 import userRouter from './routes/user.js';
 import requestRouter from './routes/request.js';
 import searchRouter from './routes/searchUser.js';
+import chatRouter from './routes/chat.js';
 import cors from 'cors';
 
 export const app=express();
 app.use(cookieParser());
+const server = http.createServer(app);
+initialiseSocket(server);
 
 app.use(cors(
   {
@@ -29,6 +34,7 @@ app.use('/', profileRouter);
 app.use('/',userRouter);
 app.use('/',requestRouter);
 app.use('/',searchRouter);
+app.use('/',chatRouter);
 // TO connect to the database and start the server
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -38,7 +44,7 @@ app.use((err, req, res, next) => {
 connectDB()
   .then(() => {
     console.log("✅ Database connected");
-    app.listen(process.env.PORT, () => {
+    server.listen(process.env.PORT, () => {
       console.log(`🚀 Server is running on port ${process.env.PORT}`);
     });
   })
