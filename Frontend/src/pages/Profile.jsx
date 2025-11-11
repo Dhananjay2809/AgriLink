@@ -6,6 +6,7 @@ import EditProfile from "../components/EditProfile";
 import ProfileImageUpload from "../components/ProfileImageUpload"; // ADD THIS IMPORT
 import { useAuth } from "../authContext/AuthContext";
 import ChatRoom from '../components/chatRoom'; // ADD THIS IMPORT
+import MyPosts from "../components/MyPosts";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -187,7 +188,7 @@ const handleCloseChat = () => {
             
             <button
               onClick={() => setShowEditModal(true)}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap cursor-pointer"
             >
               Edit Profile
             </button>
@@ -203,7 +204,7 @@ const handleCloseChat = () => {
                 className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
                   activeTab === "profile"
                     ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 cursor-pointer"
                 }`}
               >
                 Profile Info
@@ -213,7 +214,7 @@ const handleCloseChat = () => {
                 className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
                   activeTab === "posts"
                     ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 cursor-pointer"
                 }`}
               >
                 My Posts
@@ -223,7 +224,7 @@ const handleCloseChat = () => {
                 className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
                   activeTab === "followers"
                     ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 cursor-pointer"
                 }`}
               >
                 Followers
@@ -233,7 +234,7 @@ const handleCloseChat = () => {
                 className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
                   activeTab === "following"
                     ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 cursor-pointer"
                 }`}
               >
                 Following
@@ -348,12 +349,10 @@ const handleCloseChat = () => {
             )}
 
             {activeTab === "posts" && (
-              <div className="text-center py-8">
-                <p className="text-gray-500 dark:text-gray-400">
-                  Posts feature coming soon...
-                </p>
-              </div>
-            )}
+  <div>
+    <MyPosts />
+  </div>
+)}
 
             {activeTab === "followers" && (
   <div>

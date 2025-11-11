@@ -15,18 +15,9 @@ const MyPosts = () => {
     try {
       setLoading(true);
       setError("");
-      console.log("🔄 Fetching my posts...");
-      
       const response = await getMyPosts();
-      console.log("📦 API Response:", response);
-      console.log("📦 Response data:", response.data);
-      console.log("📦 My posts array:", response.data.myPosts);
-      
       setPosts(response.data.myPosts || []);
-      
     } catch (err) {
-      console.error("💥 Error fetching posts:", err);
-      console.error("💥 Error details:", err.response?.data);
       setError("Failed to load your posts");
     } finally {
       setLoading(false);
@@ -80,21 +71,6 @@ const MyPosts = () => {
             </button>
           </div>
         )}
-
-        {/* Debug Info */}
-        <div className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900 rounded-lg">
-          <h3 className="font-bold text-yellow-800 dark:text-yellow-200">Debug Info:</h3>
-          <p className="text-sm text-yellow-700 dark:text-yellow-300">
-            Posts in state: {posts.length}<br />
-            User ID: {user?.id}
-          </p>
-          <button 
-            onClick={() => console.log("Posts state:", posts)}
-            className="mt-2 bg-yellow-500 text-white px-3 py-1 rounded text-sm"
-          >
-            Log Posts to Console
-          </button>
-        </div>
 
         {posts.length === 0 ? (
           <div className="text-center py-12">

@@ -50,40 +50,64 @@ const Network = () => {
     }
     fetchData();
   }, [navigate, user, activeTab]);
+  const fetchProfileData = async () => {
+  try {
+    const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
+    const response = await fetch("http://localhost:3000/profile", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+      credentials: "include"
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    }
+    return { followers: [], following: [] };
+  } catch (error) {
+    console.error("Error fetching profile data:", error);
+    return { followers: [], following: [] };
+  }
+};
 
   const fetchData = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      
-      switch (activeTab) {
-        case "received":
-          const receivedResponse = await getPendingRequestsReceived();
-          setReceivedRequests(receivedResponse.data || []);
-          break;
-          
-        case "sent":
-          const sentResponse = await getPendingRequestsSent();
-          setSentRequests(sentResponse.data || []);
-          break;
-          
-        case "followers":
-          const followersResponse = await getMyFollowers();
-          setFollowers(followersResponse.data || []);
-          break;
-          
-        case "following":
-          const followingResponse = await getMyFollowing();
-          setFollowing(followingResponse.data || []);
-          break;
-      }
-    } catch (err) {
-      console.error("Network error:", err);
-      setError("Failed to load data");
-    } finally {
-      setLoading(false);
+  try {
+    setLoading(true);
+    setError("");
+    
+    switch (activeTab) {
+      case "received":
+        const receivedResponse = await getPendingRequestsReceived();
+        setReceivedRequests(receivedResponse.data || []);
+        break;
+        
+      case "sent":
+        const sentResponse = await getPendingRequestsSent();
+        setSentRequests(sentResponse.data || []);
+        break;
+        
+      case "followers":
+        // Use the profile API instead of /followers/me
+        const profileResponse = await fetchProfileData();
+        setFollowers(profileResponse.followers || []);
+        break;
+        
+      case "following":
+        // Use the profile API instead of /following/me
+        const profileResponse2 = await fetchProfileData();
+        setFollowing(profileResponse2.following || []);
+        break;
     }
-  };
+  } catch (err) {
+    console.error("Network error:", err);
+    setError("Failed to load data");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleAcceptRequest = async (requestId) => {
     try {
@@ -172,7 +196,7 @@ const Network = () => {
           </h1>
           <button
             onClick={handleManualRefresh}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm cursor-progress"
           >
             Refresh Data
           </button>
@@ -199,7 +223,7 @@ const Network = () => {
                 className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
                   activeTab === "received"
                     ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 cursor-pointer"
                 }`}
               >
                 Received Requests
@@ -214,7 +238,7 @@ const Network = () => {
                 className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
                   activeTab === "sent"
                     ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 cursor-pointer"
                 }`}
               >
                 Sent Requests
@@ -229,7 +253,7 @@ const Network = () => {
                 className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
                   activeTab === "followers"
                     ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 cursor-pointer"
                 }`}
               >
                 Followers
@@ -239,7 +263,7 @@ const Network = () => {
                 className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${
                   activeTab === "following"
                     ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 cursor-pointer"
                 }`}
               >
                 Following

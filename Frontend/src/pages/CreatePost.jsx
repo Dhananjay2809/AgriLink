@@ -74,6 +74,15 @@ const CreatePost = () => {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
             Create New Post
           </h1>
+          <button
+    type="button"
+    onClick={() => navigate("/")}
+    className="fixed top-4 right-4 z-50 bg-white dark:bg-gray-800 rounded-full p-2 shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+  >
+    <svg className="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  </button>
 
           {error && (
             <div className="p-4 mb-4 text-sm text-red-800 bg-red-50 rounded-lg dark:bg-red-900 dark:text-red-200">
@@ -124,7 +133,7 @@ const CreatePost = () => {
                 id="cropType"
                 value={form.cropType}
                 onChange={handleChange}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white cursor-po"
                 required
               >
                 <option value="">Select Crop Type</option>
@@ -206,7 +215,7 @@ const CreatePost = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {loading ? "Creating Post..." : "Create Post"}
             </button>

@@ -2,10 +2,15 @@
 export default {
   content: [
     "./index.html",
-    "./src/**/*.{js,jsx,ts,tsx}",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class', // Enable class-based dark mode
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        // You can add custom colors if needed
+      },
+    },
   },
-  plugins: [],
+  plugins: [], // Remove daisyui from plugins
 }

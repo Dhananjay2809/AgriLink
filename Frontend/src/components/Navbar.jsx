@@ -2,12 +2,14 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../authContext/AuthContext";
 import SearchModal from "./SearchModal";
-
+import ThemeSwitcher from "./ThemeSwitcher";
+import { useTheme } from "../contexts/ThemeContext";
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const { user, logout } = useAuth();
+    const { theme } = useTheme();
   const navigate = useNavigate();
   
   // Ref for dropdown to detect outside clicks
@@ -52,12 +54,15 @@ const Navbar = () => {
               </span>
             </div>
           )}
+           {/* Theme Switcher */}
+          <ThemeSwitcher />
+
 
           {/* SEARCH BUTTON */}
           {user && (
             <button
               onClick={() => setShowSearchModal(true)}
-              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 cursor-pointer"
               title="Search Users"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,9 +91,9 @@ const Navbar = () => {
                   <span className="block text-sm font-medium text-gray-900 dark:text-white">
                     {user?.firstname} {user?.lastname || ''}
                   </span>
-                  <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
-                    {user?.email}
-                  </span>
+                  {/* <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
+                    {user?.email  }
+                  </span> */}
                   <span className="block text-sm text-gray-500 capitalize dark:text-gray-400">
                     {user?.role}
                   </span>
@@ -119,9 +124,22 @@ const Navbar = () => {
                     </Link>
                   </li>
                   <li>
+            <Link 
+    to="/settings" 
+    className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+    onClick={() => setIsDropdownOpen(false)}
+  >
+    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+    Settings
+  </Link>
+</li>
+                  <li>
                     <button 
                       onClick={handleLogout}
-                      className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                      className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-"
                     >
                       <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -148,6 +166,15 @@ const Navbar = () => {
         
         <div className={`items-center justify-between w-full md:flex md:w-auto md:order-1 ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
           <ul className="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+            <li>
+              <Link 
+                to="/" 
+                className="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Home 
+              </Link>
+            </li>
             <li>
               <Link 
                 to="/" 

@@ -9,7 +9,9 @@ import Followers from "./pages/Followers";
 import Network from "./pages/Network";
 import LoadingSpinner from "./components/LoadingSpinner";
 import MyPosts from "./components/MyPosts";
-
+import { ThemeProvider } from './contexts/ThemeContext.jsx'
+import Settings from "./pages/Settings";
+import MyPosts from "./components/MyPosts";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
@@ -44,6 +46,7 @@ const PublicRoute = ({ children }) => {
   
   return children;
 };
+
 
 function AppContent() {
   const { user } = useAuth();
@@ -93,6 +96,11 @@ function AppContent() {
             <Network />
           </ProtectedRoute>
         } />
+        <Route path="/settings" element={
+  <ProtectedRoute>
+    <Settings />
+  </ProtectedRoute>
+} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
@@ -101,9 +109,11 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+     <ThemeProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
