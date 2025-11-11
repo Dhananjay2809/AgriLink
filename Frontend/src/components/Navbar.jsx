@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../authContext/AuthContext";
 import SearchModal from "./SearchModal";
@@ -9,10 +9,28 @@ const Navbar = () => {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  
+  // Ref for dropdown to detect outside clicks
+  const dropdownRef = useRef(null);
 
   const handleLogout = async () => {
     await logout();
+    setIsDropdownOpen(false);
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <nav className="bg-white border-b border-gray-200 dark:bg-gray-900 dark:border-gray-700 sticky top-0 z-50">
@@ -48,60 +66,73 @@ const Navbar = () => {
             </button>
           )}
           
-          <button 
-            type="button" 
-            className="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600" 
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          >
-            <span className="sr-only">Open user menu</span>
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-              {user?.firstname?.charAt(0) || user?.name?.charAt(0) || 'U'}
-            </div>
-          </button>
-          
-          {isDropdownOpen && (
-            <div className="z-50 absolute right-4 mt-10 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600">
-              <div className="px-4 py-3">
-                <span className="block text-sm text-gray-900 dark:text-white">
-                  {user?.firstname} {user?.lastname || ''}
-                </span>
-                <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
-                  {user?.email}
-                </span>
-                <span className="block text-sm text-gray-500 capitalize dark:text-gray-400">
-                  {user?.role}
-                </span>
+          {/* DROPDOWN CONTAINER WITH REF */}
+          <div className="relative" ref={dropdownRef}>
+            <button 
+              type="button" 
+              className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600 cursor-pointer" 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            >
+              <span className="sr-only">Open user menu</span>
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                {user?.firstname?.charAt(0) || user?.name?.charAt(0) || 'U'}
               </div>
-              <ul className="py-2">
-                <li>
-                  <Link 
-                    to="/profile" 
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                    onClick={() => setIsDropdownOpen(false)}
-                  >
-                    Profile
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    to="/create-post" 
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                    onClick={() => setIsDropdownOpen(false)}
-                  >
-                    Create Post
-                  </Link>
-                </li>
-                <li>
-                  <button 
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                  >
-                    Sign out
-                  </button>
-                </li>
-              </ul>
-            </div>
-          )}
+            </button>
+            
+            {/* DROPDOWN MENU */}
+            {isDropdownOpen && (
+              <div className="z-50 absolute right-0 mt-2 w-56 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-lg dark:bg-gray-700 dark:divide-gray-600">
+                <div className="px-4 py-3">
+                  <span className="block text-sm font-medium text-gray-900 dark:text-white">
+                    {user?.firstname} {user?.lastname || ''}
+                  </span>
+                  <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
+                    {user?.email}
+                  </span>
+                  <span className="block text-sm text-gray-500 capitalize dark:text-gray-400">
+                    {user?.role}
+                  </span>
+                </div>
+                <ul className="py-2">
+                  <li>
+                    <Link 
+                      to="/profile" 
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      Profile
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      to="/create-post" 
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      Create Post
+                    </Link>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={handleLogout}
+                      className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Sign out
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
           
           <button 
             type="button" 
@@ -127,7 +158,6 @@ const Navbar = () => {
               </Link>
             </li>
             <li>
-              {/* UPDATED: Changed from /followers to /network */}
               <Link 
                 to="/network" 
                 className="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
