@@ -1,11 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { deletePost } from "../api/posts";
 import { useAuth } from "../authContext/AuthContext";
+import { calculateDistance } from "../utils/locationUtils";
 
-const PostCard = ({ post, onDelete, showActions = false }) => {
+const PostCard = ({ post, onDelete, showActions = false, showDistance = false, userLocation = null }) => {
   const { user } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [distance, setDistance] = useState(null);
+
+  // Calculate distance when component mounts or props change
+  useEffect(() => {
+    if (showDistance && userLocation && post.coordinates) {
+      const calculatedDistance = calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        post.coordinates.latitude,
+        post.coordinates.longitude
+      );
+      setDistance(calculatedDistance);
+    } else {
+      setDistance(null);
+    }
+  }, [showDistance, userLocation, post.coordinates]);
 
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
@@ -79,6 +96,13 @@ const PostCard = ({ post, onDelete, showActions = false }) => {
           <div className="absolute top-4 left-4 px-3 py-1 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full text-sm font-medium text-gray-800 dark:text-white capitalize">
             {post.cropType}
           </div>
+
+          {/* Distance Badge */}
+          {distance !== null && (
+            <div className="absolute bottom-4 right-4 px-3 py-1 bg-black/70 backdrop-blur-sm rounded-full text-xs font-medium text-white">
+              {distance.toFixed(1)} km away
+            </div>
+          )}
         </div>
       )}
 

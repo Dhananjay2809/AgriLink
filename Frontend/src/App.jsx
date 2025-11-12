@@ -9,9 +9,9 @@ import Followers from "./pages/Followers";
 import Network from "./pages/Network";
 import LoadingSpinner from "./components/LoadingSpinner";
 import MyPosts from "./components/MyPosts";
-import { ThemeProvider } from './contexts/ThemeContext.jsx'
+import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import Settings from "./pages/Settings";
-import MyPosts from "./components/MyPosts";
+import Feed from './pages/Feed';
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
@@ -71,6 +71,7 @@ function AppContent() {
             <Home />
           </ProtectedRoute>
         } />
+        <Route path="/feed" element={<Feed />} />
         <Route path="/profile" element={
           <ProtectedRoute>
             <Profile />
