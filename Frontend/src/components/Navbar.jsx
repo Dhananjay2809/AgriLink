@@ -5,6 +5,7 @@ import SearchModal from "./SearchModal";
 import ThemeSwitcher from "./ThemeSwitcher";
 import { useTheme } from "../contexts/ThemeContext";
 import NavbarChat from './NavbarChat';
+import Notifications from './Notifications';
 
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -47,21 +48,9 @@ const Navbar = () => {
           <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">AgriLink</span>
         </Link>
         
-        
         <div className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-          {/* User Welcome Message */}
-          {user && (
-            <div className="hidden md:flex items-center space-x-2 mr-4">
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                Welcome, <strong>{user.firstname || user.name}</strong>
-              </span>
-            </div>
-          )}
-
-          {user && <NavbarChat />}
-           {/* Theme Switcher */}
+          {/* Theme Switcher */}
           <ThemeSwitcher />
-
 
           {/* SEARCH BUTTON */}
           {user && (
@@ -75,7 +64,12 @@ const Navbar = () => {
               </svg>
             </button>
           )}
-          
+
+          {/* NOTIFICATIONS BUTTON */}
+          {user && <Notifications />}
+
+          {/* MESSAGES BUTTON */}
+          {user && <NavbarChat />}
           
           {/* DROPDOWN CONTAINER WITH REF */}
           <div className="relative" ref={dropdownRef}>
@@ -97,9 +91,6 @@ const Navbar = () => {
                   <span className="block text-sm font-medium text-gray-900 dark:text-white">
                     {user?.firstname} {user?.lastname || ''}
                   </span>
-                  {/* <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
-                    {user?.email  }
-                  </span> */}
                   <span className="block text-sm text-gray-500 capitalize dark:text-gray-400">
                     {user?.role}
                   </span>
@@ -145,7 +136,7 @@ const Navbar = () => {
                   <li>
                     <button 
                       onClick={handleLogout}
-                      className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-"
+                      className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white cursor-pointer"
                     >
                       <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

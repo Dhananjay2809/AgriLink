@@ -11,6 +11,7 @@ import userRouter from './routes/user.js';
 import requestRouter from './routes/request.js';
 import searchRouter from './routes/searchUser.js';
 import chatRouter from './routes/chat.js';
+import notificationRouter from './routes/notificationRoutes.js';
 import cors from 'cors';
 
 export const app=express();
@@ -35,6 +36,7 @@ app.use('/',userRouter);
 app.use('/',requestRouter);
 app.use('/',searchRouter);
 app.use('/',chatRouter);
+app.use('/api/notifications', notificationRouter);
 // TO connect to the database and start the server
 app.use((err, req, res, next) => {
   console.error(err.stack);

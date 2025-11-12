@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { searchUsers } from "../api/search";
 import { sendFollowRequest } from "../api/requests";
 import { useAuth } from "../authContext/AuthContext";
+import io from 'socket.io-client';
 
 const SearchModal = ({ isOpen, onClose }) => {
   const { user: currentUser } = useAuth();
@@ -10,7 +11,19 @@ const SearchModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [sendingRequests, setSendingRequests] = useState({});
+  const socketRef = useRef(null);
 
+  // Initialize socket connection
+  useEffect(() => {
+    if (currentUser) {
+      socketRef.current = io('http://localhost:3000', { withCredentials: true });
+      socketRef.current.emit('joinUser', currentUser._id);
+
+      return () => socketRef.current?.disconnect();
+    }
+  }, [currentUser]);
+
+  // Search users when query changes
   useEffect(() => {
     if (query.trim().length > 2) {
       searchUsersDebounced(query);
@@ -28,7 +41,6 @@ const SearchModal = ({ isOpen, onClose }) => {
         const response = await searchUsers(searchQuery);
         setUsers(response.data.users || []);
       } catch (err) {
-        console.error("Search error:", err);
         setError("Failed to search users");
       } finally {
         setLoading(false);
@@ -41,11 +53,18 @@ const SearchModal = ({ isOpen, onClose }) => {
       setSendingRequests(prev => ({ ...prev, [userId]: true }));
       setError("");
       
-      console.log("🔄 Sending follow request to user ID:", userId);
-      const response = await sendFollowRequest(userId);
-      console.log("✅ Follow request sent:", response.data);
+      await sendFollowRequest(userId);
       
-      // Update UI to show request sent
+      // Emit socket notification
+      if (socketRef.current) {
+        socketRef.current.emit('sendFriendRequest', {
+          fromUserId: currentUser._id,
+          toUserId: userId,
+          fromUserName: currentUser.firstname || currentUser.name
+        });
+      }
+      
+      // Update UI
       setUsers(prevUsers => 
         prevUsers.map(user => 
           user._id === userId 
@@ -54,13 +73,10 @@ const SearchModal = ({ isOpen, onClose }) => {
         )
       );
       
-      // 🔥 IMPORTANT: Trigger refresh for Network page
-      console.log("🔄 Dispatching refresh event for Network page");
+      // Trigger refresh for Network page
       window.dispatchEvent(new CustomEvent('refreshNetworkData'));
       
     } catch (err) {
-      console.error("💥 Follow error:", err);
-      console.error("💥 Error response:", err.response?.data);
       setError(err.response?.data?.message || "Failed to send follow request");
     } finally {
       setSendingRequests(prev => ({ ...prev, [userId]: false }));
@@ -74,17 +90,23 @@ const SearchModal = ({ isOpen, onClose }) => {
     onClose();
   };
 
+  const getButtonState = (user) => {
+    if (user._id === currentUser?.id) return { text: 'You', disabled: true };
+    if (sendingRequests[user._id]) return { text: 'Sending...', disabled: true };
+    if (user.followStatus === 'request_sent') return { text: 'Request Sent', disabled: true };
+    return { text: 'Follow', disabled: false };
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-20 bg-transparent">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[80vh] overflow-hidden border border-gray-200 dark:border-gray-700">
+        
         {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Search Users
-            </h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Search Users</h2>
             <button
               onClick={handleClose}
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -135,9 +157,7 @@ const SearchModal = ({ isOpen, onClose }) => {
           )}
 
           {!loading && users.length === 0 && query.trim().length > 2 && (
-            <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-              No users found
-            </div>
+            <div className="p-4 text-center text-gray-500 dark:text-gray-400">No users found</div>
           )}
 
           {!loading && query.trim().length <= 2 && (
@@ -146,59 +166,46 @@ const SearchModal = ({ isOpen, onClose }) => {
             </div>
           )}
 
-          {users.map((user) => (
-            <div
-              key={user._id}
-              className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-            >
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-bold text-blue-600 dark:text-blue-300">
-                    {user.firstname?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    {user.firstname} {user.lastname || ''}
-                  </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {user.email}
-                  </p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 capitalize">
-                    {user.role}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => handleFollow(user._id)}
-                disabled={
-                  sendingRequests[user._id] || 
-                  user.followStatus === 'request_sent' ||
-                  user._id === currentUser?.id
-                }
-                className={`px-3 py-1 rounded text-sm font-medium ${
-                  user._id === currentUser?.id
-                    ? 'bg-gray-300 text-gray-500 dark:bg-gray-600 dark:text-gray-400 cursor-not-allowed'
-                    : user.followStatus === 'request_sent'
-                    ? 'bg-gray-300 text-gray-500 dark:bg-gray-600 dark:text-gray-400 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50'
-                }`}
+          {users.map((user) => {
+            const buttonState = getButtonState(user);
+            
+            return (
+              <div
+                key={user._id}
+                className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
-                {user._id === currentUser?.id
-                  ? 'You'
-                  : sendingRequests[user._id] 
-                  ? 'Sending...' 
-                  : user.followStatus === 'request_sent' 
-                  ? 'Request Sent' 
-                  : 'Follow'
-                }
-              </button>
-            </div>
-          ))}
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-bold text-blue-600 dark:text-blue-300">
+                      {user.firstname?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {user.firstname} {user.lastname || ''}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 capitalize">{user.role}</p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => handleFollow(user._id)}
+                  disabled={buttonState.disabled}
+                  className={`px-3 py-1 rounded text-sm font-medium ${
+                    buttonState.disabled
+                      ? 'bg-gray-300 text-gray-500 dark:bg-gray-600 dark:text-gray-400 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                >
+                  {buttonState.text}
+                </button>
+              </div>
+            );
+          })}
         </div>
 
-        {/* Footer with Info */}
+        {/* Footer */}
         <div className="p-3 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
             Found {users.length} user{users.length !== 1 ? 's' : ''}

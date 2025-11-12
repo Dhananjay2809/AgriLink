@@ -3,7 +3,7 @@
 3. I also connected the Frontend with the Backend so the frontend send the request to the backend , ans generate the response from the backend.
 4. Like when i login in to my website , the user login info checks in the database, if the information is present in the database, login successfull , otherwise it sends the invalid credintials.
 5. If the user send the follow request to the other user , by simply search from the search box , and the cancel the request , other user accept the request , and reject the request.
-6. When the request is accepted , it automatically upadates the followers and the following of the user.
+6. When the request is accepted , it automatically upadates the followers and the following of the user. I aso implement the feature, where the user search the user from the DB.
 7. And user check hs profile and the edit the profile and also add his profile pic, and delete his profile pic. Ans also user create the posts , it is add in the db, and the image and the video , is upload to the directly CLoudinary , and it genreates the cloudinary link of the image and it stores in the mongoDB
 8. Now i deploy this website on the AWS. and add the new features after that(live chat by the websocket, and notification method , call method, and the otp method, and the map method , to find the location from the device)
 
@@ -52,5 +52,43 @@ Now Backend deploy Noted on the AWS
 10. To give the customised name to the application instead of npm , run the following command
      (pm2 start npm -- name "AgriLink-backend" -- start)
 
+
+11. To add the DNS name to the server to call the api
+   config nginx -/etc/nginx/sites-available/default
+   restart nginx (sudo systemctl restart nginx)
+
+   Frontend Address -- 
+   Backend Address -- 
+   domain name -- AgriLink.com
 Now Both Frontend and Backend is running separately , now merge both of them
-1. 
+1. Modify the frontend BASEURL modify to the /api
+2. Run all the file again on the server 
+
+// Purchase the domain name for the website 
+1. Purchase on the godady
+2. Maintain their dns at their cloudflare
+3. 
+
+
+
+
+// Chat methods 
+1. Now i add the feature of the chat (live chat)
+2. User can create room of the chat
+3. I add the message button in the navbar , whaee the user click on the message button , where the all following friend open , and they chat each other
+4. Chat is implementes by the websocket
+
+// Post 
+1. I create the feed section where the feed of the and the post of the friens  and the nearby locations, ost seen first, in the feed.
+2. User can see his post , i created the component for the posts.
+
+// Notification 
+1. I add the feature of the notifications in this  user can check their notifications , directly i ised the soocket.io for the notification, live notification
+2. When the  user send the message and send the follow request, user can check the request, and make the notification buttn in the navbar.
+
+// Upcoming Work
+1. Profile picture seen by everyone .
+
+
+
+
