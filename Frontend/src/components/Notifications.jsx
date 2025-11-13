@@ -34,6 +34,7 @@ const Notifications = () => {
         console.log('📢 New notification received:', notification);
         setNotifications(prev => [notification, ...prev]);
         setUnreadCount(prev => prev + 1);
+        // REMOVED: Auto-open when new notification arrives
       });
 
       socketRef.current.on('connect', () => console.log("✅ Connected to notification server"));
@@ -43,6 +44,23 @@ const Notifications = () => {
     return () => {
       socketRef.current?.disconnect();
     };
+  }, [currentUser]);
+
+  // Load notifications on component mount
+  useEffect(() => {
+    const loadInitialNotifications = async () => {
+      if (currentUser) {
+        try {
+          const response = await getNotifications();
+          setNotifications(response.data.notifications || []);
+          setUnreadCount(response.data.unreadCount || 0);
+        } catch (error) {
+          console.error('Error loading notifications:', error);
+        }
+      }
+    };
+
+    loadInitialNotifications();
   }, [currentUser]);
 
   const loadNotifications = async () => {

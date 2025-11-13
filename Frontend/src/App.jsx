@@ -12,6 +12,9 @@ import MyPosts from "./components/MyPosts";
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import Settings from "./pages/Settings";
 import Feed from './pages/Feed';
+import { NotificationProvider, useNotifications } from './contexts/NotificationContext';
+import NotificationToast from './components/NotificationToast'; // Add this import
+
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
@@ -47,6 +50,23 @@ const PublicRoute = ({ children }) => {
   return children;
 };
 
+// Add this component for the Toast
+const AppWithToast = ({ children }) => {
+  const { activeToast, hideToast } = useNotifications();
+
+  return (
+    <>
+      {/* Toast notifications will appear here */}
+      {activeToast && (
+        <NotificationToast 
+          notification={activeToast} 
+          onClose={hideToast} 
+        />
+      )}
+      {children}
+    </>
+  );
+};
 
 function AppContent() {
   const { user } = useAuth();
@@ -54,65 +74,73 @@ function AppContent() {
 
   return (
     <BrowserRouter>
-      {/* NAVBAR REMOVED FROM HERE */}
-      <Routes>
-        <Route path="/login" element={
-          <PublicRoute>
-            <LoginForm />
-          </PublicRoute>
-        } />
-        <Route path="/signup" element={
-          <PublicRoute>
-            <SignupForm />
-          </PublicRoute>
-        } />
-        <Route path="/" element={
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        } />
-        <Route path="/feed" element={<Feed />} />
-        <Route path="/profile" element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        } />
-        <Route path="/create-post" element={
-          <ProtectedRoute>
-            <CreatePost />
-          </ProtectedRoute>
-        } />
-        <Route path="/my-posts" element={
-          <ProtectedRoute>
-            <MyPosts />
-          </ProtectedRoute>
-        } />
-        <Route path="/followers" element={
-          <ProtectedRoute>
-            <Followers />
-          </ProtectedRoute>
-        } />
-        <Route path="/network" element={
-          <ProtectedRoute>
-            <Network />
-          </ProtectedRoute>
-        } />
-        <Route path="/settings" element={
-  <ProtectedRoute>
-    <Settings />
-  </ProtectedRoute>
-} />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+      {/* Wrap everything with AppWithToast */}
+      <AppWithToast>
+        <Routes>
+          <Route path="/login" element={
+            <PublicRoute>
+              <LoginForm />
+            </PublicRoute>
+          } />
+          <Route path="/signup" element={
+            <PublicRoute>
+              <SignupForm />
+            </PublicRoute>
+          } />
+          <Route path="/" element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          } />
+          <Route path="/feed" element={
+            <ProtectedRoute>
+              <Feed />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/create-post" element={
+            <ProtectedRoute>
+              <CreatePost />
+            </ProtectedRoute>
+          } />
+          <Route path="/my-posts" element={
+            <ProtectedRoute>
+              <MyPosts />
+            </ProtectedRoute>
+          } />
+          <Route path="/followers" element={
+            <ProtectedRoute>
+              <Followers />
+            </ProtectedRoute>
+          } />
+          <Route path="/network" element={
+            <ProtectedRoute>
+              <Network />
+            </ProtectedRoute>
+          } />
+          <Route path="/settings" element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          } />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </AppWithToast>
     </BrowserRouter>
   );
 }
 
 function App() {
   return (
-     <ThemeProvider>
+    <ThemeProvider>
       <AuthProvider>
-        <AppContent />
+        <NotificationProvider>
+          <AppContent />
+        </NotificationProvider>
       </AuthProvider>
     </ThemeProvider>
   );
