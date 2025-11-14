@@ -79,8 +79,7 @@ const ChatRoom = ({ targetUser, onClose }) => {
       if (data.answer) {
         await handleRemoteAnswer(data.answer);
       }
-      setActiveCall(incomingCall || activeCall);
-      setIncomingCall(null);
+      // Don't set activeCall here - let handleAcceptCall handle it
     });
 
     socketRef.current.on('callRejected', () => {
@@ -271,8 +270,13 @@ const ChatRoom = ({ targetUser, onClose }) => {
       const answer = await peerConnectionRef.current.createAnswer();
       await peerConnectionRef.current.setLocalDescription(answer);
 
-      // Update UI
-      setActiveCall({ ...incomingCall });
+      // ✅ FIX: Convert incoming call to active call
+      setActiveCall({
+        fromUserId: incomingCall.fromUserId,
+        toUserId: incomingCall.toUserId,
+        callType: incomingCall.callType,
+        roomId: incomingCall.roomId
+      });
       setIncomingCall(null);
 
       // Send acceptance with answer
@@ -464,23 +468,26 @@ const ChatRoom = ({ targetUser, onClose }) => {
         </form>
       </div>
 
-      {/* Call Modals - Now with semi-transparent background so messages are visible */}
-      {activeCall && (
+      {/* ✅ FIXED: Only show ONE CallModal at a time */}
+      {incomingCall && (
+        <CallModal
+          callInfo={incomingCall}
+          onAccept={handleAcceptCall}
+          onReject={handleRejectCall}
+          onEndCall={handleEndCall}
+          isIncoming={true}
+          localStream={localStreamRef.current}
+          remoteStream={remoteStreamRef.current}
+        />
+      )}
+      
+      {activeCall && !incomingCall && (
         <CallModal
           callInfo={activeCall}
           onEndCall={handleEndCall}
           isIncoming={false}
           localStream={localStreamRef.current}
           remoteStream={remoteStreamRef.current}
-        />
-      )}
-      
-      {incomingCall && (
-        <CallModal
-          callInfo={incomingCall}
-          onAccept={handleAcceptCall}
-          onReject={handleRejectCall}
-          isIncoming={true}
         />
       )}
     </div>

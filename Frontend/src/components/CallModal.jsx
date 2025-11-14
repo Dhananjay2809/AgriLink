@@ -4,12 +4,50 @@ import { useAuth } from '../authContext/AuthContext';
 const CallModal = ({ callInfo, onAccept, onReject, onEndCall, isIncoming = false, localStream, remoteStream }) => {
   const { user: currentUser } = useAuth();
   const [callDuration, setCallDuration] = useState(0);
+  const [callAccepted, setCallAccepted] = useState(false);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const intervalRef = useRef(null);
 
-  const { callType, roomId } = callInfo || {};
+  const { callType } = callInfo || {};
   const isAudioOnly = callType === 'audio';
+
+  // Timer logic
+  useEffect(() => {
+    // Start timer immediately for outgoing calls
+    if (!isIncoming) {
+      startTimer();
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
+
+  const startTimer = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    
+    intervalRef.current = setInterval(() => {
+      setCallDuration(prev => prev + 1);
+    }, 1000);
+  };
+
+  const handleAccept = () => {
+    setCallAccepted(true);
+    startTimer();
+    onAccept();
+  };
+
+  const handleEndCall = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    onEndCall();
+  };
 
   useEffect(() => {
     if (localStream && localVideoRef.current) {
@@ -23,40 +61,39 @@ const CallModal = ({ callInfo, onAccept, onReject, onEndCall, isIncoming = false
     }
   }, [remoteStream]);
 
-  useEffect(() => {
-    if (!isIncoming && callType) {
-      // Start call timer for outgoing calls
-      intervalRef.current = setInterval(() => {
-        setCallDuration(prev => prev + 1);
-      }, 1000);
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [isIncoming, callType]);
-
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Determine call status
+  const getCallStatus = () => {
+    if (isIncoming && !callAccepted) {
+      return 'Incoming Call';
+    } else if (!isIncoming && callDuration === 0) {
+      return 'Calling...';
+    } else {
+      return 'In Call';
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-      <div className={`bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4 ${isAudioOnly ? 'max-w-sm' : 'max-w-4xl'}`}>
+    <div className="fixed inset-0 bg-white/10 dark:bg-gray-900/10 backdrop-blur-md flex items-center justify-center z-50">
+      <div className={`bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4 ${isAudioOnly ? 'max-w-sm' : 'max-w-4xl'} shadow-2xl border border-gray-200 dark:border-gray-700`}>
+        
         {/* Call Header */}
         <div className="text-center mb-6">
           <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-            {isIncoming ? 'Incoming Call' : 'Calling...'}
+            {getCallStatus()}
           </h3>
           <p className="text-gray-600 dark:text-gray-300">
             {callType === 'audio' ? 'Audio Call' : 'Video Call'}
           </p>
-          {callDuration > 0 && (
-            <p className="text-lg font-mono text-green-600 dark:text-green-400">
+          
+          {/* Show timer when call is active */}
+          {(callDuration > 0 || !isIncoming) && (
+            <p className="text-lg font-mono text-green-600 dark:text-green-400 mt-2">
               {formatTime(callDuration)}
             </p>
           )}
@@ -98,6 +135,14 @@ const CallModal = ({ callInfo, onAccept, onReject, onEndCall, isIncoming = false
                 <p className="text-sm text-gray-600 dark:text-gray-300">
                   {callInfo?.callerName || 'User'}
                 </p>
+                {/* Ringing animation for incoming calls */}
+                {isIncoming && !callAccepted && (
+                  <div className="flex space-x-1 mt-2 justify-center">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                  </div>
+                )}
               </div>
             ) : (
               <video
@@ -112,11 +157,12 @@ const CallModal = ({ callInfo, onAccept, onReject, onEndCall, isIncoming = false
 
         {/* Call Controls */}
         <div className="flex justify-center space-x-6">
-          {isIncoming ? (
+          {isIncoming && !callAccepted ? (
+            // Incoming call - show Accept/Reject
             <>
               <button
-                onClick={onAccept}
-                className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full transition-colors"
+                onClick={handleAccept}
+                className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full transition-all duration-300 shadow-lg transform hover:scale-110 active:scale-95"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M20 10.999h2C22 5.869 18.127 2 12.99 2v2C17.052 4 20 6.943 20 10.999z"/>
@@ -126,7 +172,7 @@ const CallModal = ({ callInfo, onAccept, onReject, onEndCall, isIncoming = false
               </button>
               <button
                 onClick={onReject}
-                className="bg-red-500 hover:bg-red-600 text-white p-4 rounded-full transition-colors"
+                className="bg-red-500 hover:bg-red-600 text-white p-4 rounded-full transition-all duration-300 shadow-lg transform hover:scale-110 active:scale-95"
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 10.586L16.95 5.636L18.364 7.05L13.414 12L18.364 16.95L16.95 18.364L12 13.414L7.05 18.364L5.636 16.95L10.586 12L5.636 7.05L7.05 5.636L12 10.586Z"/>
@@ -134,9 +180,10 @@ const CallModal = ({ callInfo, onAccept, onReject, onEndCall, isIncoming = false
               </button>
             </>
           ) : (
+            // Active call - show End Call button
             <button
-              onClick={onEndCall}
-              className="bg-red-500 hover:bg-red-600 text-white p-4 rounded-full transition-colors"
+              onClick={handleEndCall}
+              className="bg-red-500 hover:bg-red-600 text-white p-4 rounded-full transition-all duration-300 shadow-lg transform hover:scale-110 active:scale-95"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 10.586L16.95 5.636L18.364 7.05L13.414 12L18.364 16.95L16.95 18.364L12 13.414L7.05 18.364L5.636 16.95L10.586 12L5.636 7.05L7.05 5.636L12 10.586Z"/>
