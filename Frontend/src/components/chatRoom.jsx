@@ -354,11 +354,19 @@ const ChatRoom = ({ targetUser, onClose }) => {
             </button>
 
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                <span className="text-lg font-bold text-blue-600 dark:text-blue-300">
-                  {targetUserName?.charAt(0)?.toUpperCase() || 'U'}
-                </span>
-              </div>
+             {targetUser.profilePicture ? (
+  <img 
+    src={targetUser.profilePicture} 
+    alt={targetUserName}
+    className="w-12 h-12 rounded-full object-cover"
+  />
+) : (
+  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+    <span className="text-lg font-bold text-blue-600 dark:text-blue-300">
+      {targetUserName?.charAt(0)?.toUpperCase() || 'U'}
+    </span>
+  </div>
+)}
               <div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                   {targetUserName} {targetUser.lastname || ''}

@@ -51,6 +51,7 @@ const initialiseSocket = (server) => {
           firstName,
           text: newMessage.text,
           timestamp: newMessage.createdAt,
+          senderProfilePicture: user.profilePicture 
         });
 
         await createNotification({
