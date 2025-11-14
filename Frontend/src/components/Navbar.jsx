@@ -74,15 +74,23 @@ const Navbar = () => {
           {/* DROPDOWN CONTAINER WITH REF */}
           <div className="relative" ref={dropdownRef}>
             <button 
-              type="button" 
-              className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600 cursor-pointer" 
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            >
-              <span className="sr-only">Open user menu</span>
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                {user?.firstname?.charAt(0) || user?.name?.charAt(0) || 'U'}
-              </div>
-            </button>
+  type="button" 
+  className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600 cursor-pointer" 
+  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+>
+  <span className="sr-only">Open user menu</span>
+  {user?.profilePicture ? (
+    <img 
+      src={user.profilePicture} 
+      alt="Profile" 
+      className="w-8 h-8 rounded-full object-cover"
+    />
+  ) : (
+    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+      {user?.firstname?.charAt(0) || user?.name?.charAt(0) || 'U'}
+    </div>
+  )}
+</button>
             
             {/* DROPDOWN MENU */}
             {isDropdownOpen && (

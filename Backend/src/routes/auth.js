@@ -51,6 +51,7 @@ authRouter.post('/auth/login' , async(req,res)=>{
         name: user.firstname,
         email: user.email,
         role: user.role, 
+        profilePicture: user.profilePicture,
       } 
         });
        }

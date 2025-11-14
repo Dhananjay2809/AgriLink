@@ -4,7 +4,7 @@ export const getMyFollowing = async (req, res) => {
     const userId = req.user.id;
 
     const following = await FollowerModel.find({ follower: userId })
-      .populate("following", "firstname lastname username");
+      .populate("following", "firstname lastname username profilePicture");
 
     return res.status(200).json({ 
          followingCount: following.length,

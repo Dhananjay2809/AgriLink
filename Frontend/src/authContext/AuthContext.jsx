@@ -49,10 +49,15 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     // ✅ CRITICAL: Save BOTH user data AND token
     localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('token', token); // SAVE THE TOKEN
     setLoginSuccess(true);
     // Hide success message after 3 seconds
     setTimeout(() => setLoginSuccess(false), 3000);
+  };
+    const updateUserProfile = (updatedUser) => {
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
   const logout = async () => {
@@ -75,7 +80,8 @@ export const AuthProvider = ({ children }) => {
     logout,
     loading,
     loginSuccess,
-    setLoginSuccess
+    setLoginSuccess,
+    updateUserProfile
   };
 
   return (

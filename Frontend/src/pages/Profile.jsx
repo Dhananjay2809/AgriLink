@@ -367,11 +367,20 @@ const handleCloseChat = () => {
             className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
           >
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                <span className="text-sm font-bold text-blue-600 dark:text-blue-300">
-                  {follower.name?.charAt(0).toUpperCase()}
-                </span>
-              </div>
+            {/* WITH THIS: */}
+{follower.profilePicture ? (
+  <img 
+    src={follower.profilePicture} 
+    alt={follower.name || follower.firstname}
+    className="w-10 h-10 rounded-full object-cover"
+  />
+) : (
+  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+    <span className="text-sm font-bold text-blue-600 dark:text-blue-300">
+      {follower.name?.charAt(0)?.toUpperCase() || follower.firstname?.charAt(0)?.toUpperCase() || 'U'}
+    </span>
+  </div>
+)}
               <div>
                 <p className="font-medium text-gray-900 dark:text-white">
                   {follower.name}
@@ -414,11 +423,19 @@ const handleCloseChat = () => {
             className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
           >
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                <span className="text-sm font-bold text-green-600 dark:text-green-300">
-                  {following.name?.charAt(0).toUpperCase()}
-                </span>
-              </div>
+             {following.profilePicture ? (
+  <img 
+    src={following.profilePicture} 
+    alt={following.name || following.firstname}
+    className="w-10 h-10 rounded-full object-cover"
+  />
+) : (
+  <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+    <span className="text-sm font-bold text-green-600 dark:text-green-300">
+      {following.name?.charAt(0)?.toUpperCase() || following.firstname?.charAt(0)?.toUpperCase() || 'U'}
+    </span>
+  </div>
+)}
               <div>
                 <p className="font-medium text-gray-900 dark:text-white">
                   {following.name}

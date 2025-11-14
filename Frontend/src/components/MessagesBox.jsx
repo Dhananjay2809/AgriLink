@@ -115,11 +115,19 @@ const MessagesBox = ({ isOpen, onClose }) => {
                       className="flex items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg cursor-pointer transition-colors mb-2"
                     >
                       <div className="relative">
-                        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-3">
-                          <span className="text-lg font-bold text-blue-600 dark:text-blue-300">
-                            {firstLetter}
-                          </span>
-                        </div>
+                      {user.profilePicture ? (
+  <img 
+    src={user.profilePicture} 
+    alt={displayName}
+    className="w-12 h-12 rounded-full object-cover mr-3"
+  />
+) : (
+  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mr-3">
+    <span className="text-lg font-bold text-blue-600 dark:text-blue-300">
+      {firstLetter}
+    </span>
+  </div>
+)}
                         {friend.online && (
                           <div className="absolute bottom-0 right-2 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
                         )}

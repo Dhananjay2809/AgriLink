@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useAuth } from "../authContext/AuthContext";
 
 const ProfileImageUpload = ({ onImageUpdate, currentImage, onClose }) => {
-  const { user } = useAuth();
+  const { user, updateUserProfile } = useAuth(); // ✅ CHANGED
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -29,13 +29,10 @@ const ProfileImageUpload = ({ onImageUpdate, currentImage, onClose }) => {
 
       console.log('🔄 Uploading profile image with cookie authentication...');
 
-      // ✅ For cookie-based auth, just send the request without Authorization header
-      // The cookie will be sent automatically by the browser
       const response = await fetch('http://localhost:3000/profile/upload-image', {
         method: 'PUT',
-        credentials: 'include', // ✅ This sends cookies with the request
+        credentials: 'include',
         body: formData
-        // No Authorization header needed for cookie auth
       });
 
       const data = await response.json();
@@ -45,7 +42,7 @@ const ProfileImageUpload = ({ onImageUpdate, currentImage, onClose }) => {
         
         // Update local storage and parent component
         if (data.user) {
-          localStorage.setItem('user', JSON.stringify(data.user));
+          updateUserProfile(data.user); // ✅ CHANGED
           onImageUpdate?.(data.user);
         }
         
@@ -70,7 +67,7 @@ const ProfileImageUpload = ({ onImageUpdate, currentImage, onClose }) => {
 
       const response = await fetch('http://localhost:3000/profile/remove-image', {
         method: 'DELETE',
-        credentials: 'include', // ✅ This sends cookies with the request
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         }
@@ -83,7 +80,7 @@ const ProfileImageUpload = ({ onImageUpdate, currentImage, onClose }) => {
         
         // Update local storage and parent component
         if (data.user) {
-          localStorage.setItem('user', JSON.stringify(data.user));
+          updateUserProfile(data.user); // ✅ CHANGED
           onImageUpdate?.(data.user);
         }
         

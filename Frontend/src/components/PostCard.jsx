@@ -111,11 +111,19 @@ const PostCard = ({ post, onDelete, showActions = false, showDistance = false, u
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-lg">
-                {getAvatarChar()}
-              </span>
-            </div>
+           {userInfo?.profilePicture ? (
+  <img 
+    src={userInfo.profilePicture} 
+    alt={getDisplayName()}
+    className="w-12 h-12 rounded-full object-cover shadow-md"
+  />
+) : (
+  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-md">
+    <span className="text-white font-bold text-lg">
+      {getAvatarChar()}
+  </span>
+  </div>
+)}
             <div>
               <h3 className="font-bold text-gray-900 dark:text-white text-lg">
                 {getDisplayName()}

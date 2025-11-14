@@ -15,12 +15,12 @@ const profileRouter = expess.Router();
             return res.status(404).send({ message: 'User not found' });
         }
         const followers = await FollowerModel.find({ following: userId })
-      .populate('follower', 'name email') // show follower name & email
+      .populate('follower', 'name email profilePicture') // show follower name & email
       .select('follower');
 
     // Fetch following (people the user follows)
     const following = await FollowerModel.find({ follower: userId })
-      .populate('following', 'name email')
+      .populate('following', 'name email profilePicture')
       .select('following');
         res.status(200).send({ user,
               followersCount: followers.length,
@@ -150,13 +150,14 @@ profileRouter.put(
 
 //Delete Profile Picture
 // Remove Profile Picture (only from DB, not Cloudinary)
+// Delete Profile Picture - FIXED VERSION
 profileRouter.delete('/profile/remove-image', userAuth, async (req, res) => {
   try {
     const userId = req.user.id;
 
     const updatedUser = await UserModel.findByIdAndUpdate(
       userId,
-      { profilePic: null },
+      { profilePicture: null }, // ✅ Change from profilePic to profilePicture
       { new: true }
     ).select("-password");
 
