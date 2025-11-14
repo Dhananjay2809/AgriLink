@@ -98,6 +98,94 @@ const initialiseSocket = (server) => {
         console.error("Error creating like notification:", err.message);
       }
     });
+    const callRooms = new Map(); // Track active calls
+
+socket.on("joinUser", (userId) => {
+  socket.join(userId);
+  console.log(`🔔 User ${userId} joined notification room`);
+});
+
+// Add call event handlers
+// In your socket.js backend
+socket.on("initiateCall", async ({ fromUserId, toUserId, callType, offer, roomId, callerName }) => {
+  try {
+    console.log(`📞 Call initiated from ${fromUserId} to ${toUserId}`);
+    
+    // Store call info
+    callRooms.set(roomId, { 
+      fromUserId, 
+      toUserId, 
+      callType,
+      offer 
+    });
+    
+    // Notify the recipient WITH CALLER NAME
+    io.to(toUserId).emit("incomingCall", {
+      fromUserId,
+      toUserId,
+      callType,
+      offer,
+      roomId,
+      callerName // ✅ Add caller name from the caller
+    });
+    
+    console.log(`✅ Incoming call sent to ${toUserId} from ${callerName}`);
+  } catch (error) {
+    console.error("Error initiating call:", error);
+  }
+});
+socket.on("acceptCall", ({ roomId, signal }) => {
+  const call = callRooms.get(roomId);
+  if (call) {
+    // Notify the caller that call was accepted
+    io.to(call.fromUserId).emit("callAccepted", {
+      signal,
+      roomId
+    });
+  }
+});
+
+socket.on("rejectCall", ({ roomId }) => {
+  const call = callRooms.get(roomId);
+  if (call) {
+    // Notify the caller that call was rejected
+    io.to(call.fromUserId).emit("callRejected", {
+      reason: "User busy"
+    });
+    
+    // Clean up
+    callRooms.delete(roomId);
+  }
+});
+
+socket.on("endCall", ({ roomId }) => {
+  const call = callRooms.get(roomId);
+  if (call) {
+    // Notify both users
+    io.to(call.fromUserId).emit("callEnded");
+    io.to(call.toUserId).emit("callEnded");
+    
+    // Clean up
+    callRooms.delete(roomId);
+    console.log(`📞 Call ended in room ${roomId}`);
+  }
+});
+
+socket.on("webrtcSignal", ({ roomId, signal }) => {
+  // Relay WebRTC signals between users
+  socket.to(roomId).emit("webrtcSignal", signal);
+});
+
+socket.on("disconnect", () => {
+  // Clean up any calls this user was involved in
+  for (const [roomId, call] of callRooms.entries()) {
+    if (call.fromUserId === socket.userId || call.toUserId === socket.userId) {
+      callRooms.delete(roomId);
+      io.to(roomId).emit("callEnded", { reason: "User disconnected" });
+    }
+  }
+  console.log("🔴 User disconnected:", socket.id);
+});
 
     socket.on("disconnect", () => {
       console.log("🔴 User disconnected:", socket.id);

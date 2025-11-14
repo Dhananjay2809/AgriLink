@@ -2,20 +2,26 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../authContext/AuthContext';
 import { getMessages, sendMessage } from '../api/chat';
 import io from 'socket.io-client';
+import CallModal from './CallModal';
 
 const ChatRoom = ({ targetUser, onClose }) => {
   const { user: currentUser } = useAuth();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [activeCall, setActiveCall] = useState(null);
+  const [incomingCall, setIncomingCall] = useState(null);
+  
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
+  const peerConnectionRef = useRef(null);
+  const localStreamRef = useRef(null);
+  const remoteStreamRef = useRef(null);
 
   // Helper functions
   const getUserId = (user) => user?._id || user?.id;
   const getUserName = (user) => {
     if (!user) return 'Unknown';
-    // Extract name from email if no name fields exist
     if (user.email && !user.firstname && !user.name) {
       const emailName = user.email.split('@')[0];
       return emailName.charAt(0).toUpperCase() + emailName.slice(1);
@@ -36,6 +42,7 @@ const ChatRoom = ({ targetUser, onClose }) => {
 
     return () => {
       socketRef.current?.disconnect();
+      cleanupMedia();
     };
   }, [targetUser, currentUser]);
 
@@ -46,17 +53,115 @@ const ChatRoom = ({ targetUser, onClose }) => {
       withCredentials: true
     });
 
+    // Join user's personal room
+    socketRef.current.emit('joinUser', currentUserId);
     socketRef.current.emit('joinChat', {
       userId: currentUserId,
       targetUserId: targetUserId
     });
 
+    // Message handlers
     socketRef.current.on('messageReceived', (message) => {
       setMessages(prev => [...prev, message]);
     });
 
+    // Call event handlers
+    socketRef.current.on('incomingCall', async (callData) => {
+      console.log('📞 Incoming call received:', callData);
+      setIncomingCall({
+        ...callData,
+        callerName: targetUserName
+      });
+    });
+
+    socketRef.current.on('callAccepted', async (data) => {
+      console.log('✅ Call accepted');
+      if (data.answer) {
+        await handleRemoteAnswer(data.answer);
+      }
+      setActiveCall(incomingCall || activeCall);
+      setIncomingCall(null);
+    });
+
+    socketRef.current.on('callRejected', () => {
+      console.log('❌ Call rejected');
+      setIncomingCall(null);
+      setActiveCall(null);
+      cleanupMedia();
+      alert('Call was rejected');
+    });
+
+    socketRef.current.on('callEnded', () => {
+      console.log('📞 Call ended');
+      setIncomingCall(null);
+      setActiveCall(null);
+      cleanupMedia();
+    });
+
+    socketRef.current.on('webrtcSignal', async (signal) => {
+      if (signal.type === 'offer' && peerConnectionRef.current) {
+        await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(signal));
+        const answer = await peerConnectionRef.current.createAnswer();
+        await peerConnectionRef.current.setLocalDescription(answer);
+        socketRef.current.emit('webrtcSignal', {
+          roomId: activeCall?.roomId,
+          signal: answer
+        });
+      } else if (signal.type === 'answer' && peerConnectionRef.current) {
+        await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(signal));
+      } else if (signal.candidate && peerConnectionRef.current) {
+        await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(signal.candidate));
+      }
+    });
+
     socketRef.current.on('connect', () => console.log("✅ Connected to chat server"));
     socketRef.current.on('disconnect', () => console.log("❌ Disconnected from chat server"));
+  };
+
+  const createPeerConnection = () => {
+    const configuration = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
+    };
+
+    const pc = new RTCPeerConnection(configuration);
+
+    // Add local stream tracks
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach(track => {
+        pc.addTrack(track, localStreamRef.current);
+      });
+    }
+
+    // Handle remote stream
+    pc.ontrack = (event) => {
+      console.log('Remote stream received');
+      remoteStreamRef.current = event.streams[0];
+    };
+
+    // Handle ICE candidates
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        socketRef.current.emit('webrtcSignal', {
+          roomId: activeCall?.roomId,
+          signal: event.candidate
+        });
+      }
+    };
+
+    pc.onconnectionstatechange = () => {
+      console.log('Connection state:', pc.connectionState);
+      if (pc.connectionState === 'connected') {
+        console.log('✅ WebRTC connection established');
+      } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+        console.log('❌ WebRTC connection failed');
+        handleEndCall();
+      }
+    };
+
+    return pc;
   };
 
   const loadMessages = async () => {
@@ -78,7 +183,6 @@ const ChatRoom = ({ targetUser, onClose }) => {
     if (!newMessage.trim() || !currentUserId || !targetUserId) return;
 
     try {
-      // Send via Socket.io for real-time
       socketRef.current.emit('sendMessage', {
         userId: currentUserId,
         targetUserId: targetUserId,
@@ -86,7 +190,6 @@ const ChatRoom = ({ targetUser, onClose }) => {
         text: newMessage
       });
 
-      // Save to database
       await sendMessage({
         userId: currentUserId,
         targetUserId: targetUserId,
@@ -97,6 +200,128 @@ const ChatRoom = ({ targetUser, onClose }) => {
     } catch (error) {
       console.error('Error sending message:', error);
     }
+  };
+
+  // Call functions
+  const initiateCall = async (callType) => {
+    if (!currentUserId || !targetUserId) return;
+
+    try {
+      // Get user media
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: callType === 'video',
+        audio: true
+      });
+      
+      localStreamRef.current = stream;
+
+      // Create peer connection
+      peerConnectionRef.current = createPeerConnection();
+
+      // Create offer
+      const offer = await peerConnectionRef.current.createOffer();
+      await peerConnectionRef.current.setLocalDescription(offer);
+
+      // Set active call
+      const roomId = `call_${currentUserId}_${targetUserId}`;
+      setActiveCall({
+        fromUserId: currentUserId,
+        toUserId: targetUserId,
+        callType: callType,
+        roomId: roomId
+      });
+
+      // Send call initiation
+      socketRef.current.emit('initiateCall', {
+        fromUserId: currentUserId,
+        toUserId: targetUserId,
+        callType: callType,
+        offer: offer,
+        roomId: roomId
+      });
+
+    } catch (error) {
+      console.error('Error initiating call:', error);
+      alert('Failed to start call. Please check your camera/microphone permissions.');
+      cleanupMedia();
+    }
+  };
+
+  const handleAcceptCall = async () => {
+    if (!incomingCall) return;
+
+    try {
+      // Get user media
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: incomingCall.callType === 'video',
+        audio: true
+      });
+      
+      localStreamRef.current = stream;
+
+      // Create peer connection
+      peerConnectionRef.current = createPeerConnection();
+
+      // Set remote description from offer
+      await peerConnectionRef.current.setRemoteDescription(
+        new RTCSessionDescription(incomingCall.offer)
+      );
+
+      // Create answer
+      const answer = await peerConnectionRef.current.createAnswer();
+      await peerConnectionRef.current.setLocalDescription(answer);
+
+      // Update UI
+      setActiveCall({ ...incomingCall });
+      setIncomingCall(null);
+
+      // Send acceptance with answer
+      socketRef.current.emit('acceptCall', {
+        roomId: incomingCall.roomId,
+        answer: answer
+      });
+
+    } catch (error) {
+      console.error('Error accepting call:', error);
+      handleRejectCall();
+    }
+  };
+
+  const handleRemoteAnswer = async (answer) => {
+    if (peerConnectionRef.current) {
+      await peerConnectionRef.current.setRemoteDescription(
+        new RTCSessionDescription(answer)
+      );
+    }
+  };
+
+  const handleRejectCall = () => {
+    if (incomingCall) {
+      socketRef.current.emit('rejectCall', { roomId: incomingCall.roomId });
+      setIncomingCall(null);
+      cleanupMedia();
+    }
+  };
+
+  const handleEndCall = () => {
+    if (activeCall) {
+      socketRef.current.emit('endCall', { roomId: activeCall.roomId });
+    }
+    setActiveCall(null);
+    setIncomingCall(null);
+    cleanupMedia();
+  };
+
+  const cleanupMedia = () => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach(track => track.stop());
+      localStreamRef.current = null;
+    }
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.close();
+      peerConnectionRef.current = null;
+    }
+    remoteStreamRef.current = null;
   };
 
   const scrollToBottom = () => {
@@ -123,7 +348,7 @@ const ChatRoom = ({ targetUser, onClose }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
             </button>
-            
+
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
                 <span className="text-lg font-bold text-blue-600 dark:text-blue-300">
@@ -141,11 +366,42 @@ const ChatRoom = ({ targetUser, onClose }) => {
               </div>
             </div>
           </div>
+
+          {/* Call Buttons - Moved to top right corner */}
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => initiateCall('audio')}
+              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white p-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 flex items-center justify-center group"
+              title="Audio Call"
+              disabled={!!activeCall || !!incomingCall}
+            >
+              <svg className="w-6 h-6 group-hover:animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 10.999h2C22 5.869 18.127 2 12.99 2v2C17.052 4 20 6.943 20 10.999z"/>
+                <path d="M13 8c2.103 0 3 .897 3 3v2h2c0-2.837-1.663-5.018-5-5.874V8z"/>
+                <path d="M12.5 8C10.015 8 8 10.015 8 12.5s2.015 4.5 4.5 4.5 4.5-2.015 4.5-4.5S14.985 8 12.5 8zM12.5 15C10.565 15 9 13.435 9 11.5S10.565 8 12.5 8s3.5 1.565 3.5 3.5S14.435 15 12.5 15z"/>
+              </svg>
+            </button>
+            
+            <button
+              onClick={() => initiateCall('video')}
+              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white p-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 flex items-center justify-center group"
+              title="Video Call"
+              disabled={!!activeCall || !!incomingCall}
+            >
+              <svg className="w-6 h-6 group-hover:animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17 10.5V7C17 6.45 16.55 6 16 6H4C3.45 6 3 6.45 3 7V17C3 17.55 3.45 18 4 18H16C16.55 18 17 17.55 17 17V13.5L21 17.5V6.5L17 10.5Z"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-800 p-6">
+      {/* Messages Area - Now visible during calls */}
+      <div className={`flex-1 overflow-y-auto p-6 transition-all duration-300 ${
+        activeCall || incomingCall 
+          ? 'bg-gray-100 dark:bg-gray-800 opacity-70 blur-sm' 
+          : 'bg-gray-50 dark:bg-gray-800'
+      }`}>
         {loading ? (
           <div className="flex justify-center items-center h-full">
             <div className="text-center">
@@ -180,7 +436,9 @@ const ChatRoom = ({ targetUser, onClose }) => {
       </div>
 
       {/* Message Input */}
-      <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-6">
+      <div className={`bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-6 transition-all duration-300 ${
+        activeCall || incomingCall ? 'opacity-50' : ''
+      }`}>
         <form onSubmit={handleSendMessage} className="max-w-4xl mx-auto">
           <div className="flex space-x-4">
             <input
@@ -190,10 +448,11 @@ const ChatRoom = ({ targetUser, onClose }) => {
               placeholder={`Message ${targetUserName}...`}
               className="flex-1 p-4 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-lg"
               autoFocus
+              disabled={!!activeCall || !!incomingCall}
             />
             <button
               type="submit"
-              disabled={!newMessage.trim()}
+              disabled={!newMessage.trim() || !!activeCall || !!incomingCall}
               className="bg-blue-600 text-white px-8 py-4 rounded-2xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2 text-lg font-medium cursor-pointer"
             >
               <span>Send</span>
@@ -204,6 +463,26 @@ const ChatRoom = ({ targetUser, onClose }) => {
           </div>
         </form>
       </div>
+
+      {/* Call Modals - Now with semi-transparent background so messages are visible */}
+      {activeCall && (
+        <CallModal
+          callInfo={activeCall}
+          onEndCall={handleEndCall}
+          isIncoming={false}
+          localStream={localStreamRef.current}
+          remoteStream={remoteStreamRef.current}
+        />
+      )}
+      
+      {incomingCall && (
+        <CallModal
+          callInfo={incomingCall}
+          onAccept={handleAcceptCall}
+          onReject={handleRejectCall}
+          isIncoming={true}
+        />
+      )}
     </div>
   );
 };
