@@ -22,7 +22,7 @@ const Notifications = () => {
   // Socket.io for real-time notifications
   useEffect(() => {
     if (currentUser?._id) {
-      socketRef.current = io('http://localhost:3000', {
+      socketRef.current = io('http://localhost:5000', {
         withCredentials: true
       });
 

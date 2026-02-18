@@ -49,7 +49,7 @@ export const NotificationProvider = ({ children }) => {
     let socket;
 
     if (currentUser) {
-      socket = io('http://localhost:3000', { withCredentials: true });
+      socket = io('http://localhost:5000', { withCredentials: true });
       socket.emit('joinUser', currentUser._id);
 
       socket.on('newNotification', (notification) => {

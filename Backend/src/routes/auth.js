@@ -8,7 +8,7 @@ const authRouter=express.Router();
 
 //signup router ye new useer ko db me store krane ka route hai
  
-authRouter.post('/auth/signup', async(req,res)=>{
+authRouter.post('/signup', async(req,res)=>{
     try{
         await validateSignupData(req);
         const {firstname,email, password,role} =req.body;
@@ -25,7 +25,7 @@ authRouter.post('/auth/signup', async(req,res)=>{
     }
 });
 
-authRouter.post('/auth/login' , async(req,res)=>{
+authRouter.post('/login' , async(req,res)=>{
     const {email, password}=req.body;
     // pahle user ke email checck krenge db me hai ye nhi then password match krenge
     try{

@@ -30,7 +30,7 @@ dotenv.config();
 // Middleware to parse JSON data
 app.use(express.json());
 //All routes will be here
-app.use('/', authRouter);
+app.use('/auth', authRouter);
 app.use('/', profileRouter);
 app.use('/',userRouter);
 app.use('/',requestRouter);

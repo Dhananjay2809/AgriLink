@@ -16,7 +16,7 @@ const SearchModal = ({ isOpen, onClose }) => {
   // Initialize socket connection
   useEffect(() => {
     if (currentUser) {
-      socketRef.current = io('http://localhost:3000', { withCredentials: true });
+      socketRef.current = io('http://localhost:5000', { withCredentials: true });
       socketRef.current.emit('joinUser', currentUser._id);
 
       return () => socketRef.current?.disconnect();

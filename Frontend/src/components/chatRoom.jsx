@@ -49,7 +49,7 @@ const ChatRoom = ({ targetUser, onClose }) => {
   const initializeSocket = () => {
     if (!currentUserId || !targetUserId) return;
 
-    socketRef.current = io('http://localhost:3000', {
+    socketRef.current = io('http://localhost:5000', {
       withCredentials: true
     });
 

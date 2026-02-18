@@ -29,7 +29,7 @@ const ProfileImageUpload = ({ onImageUpdate, currentImage, onClose }) => {
 
       console.log('🔄 Uploading profile image with cookie authentication...');
 
-      const response = await fetch('http://localhost:3000/profile/upload-image', {
+      const response = await fetch('http://localhost:5000/profile/upload-image', {
         method: 'PUT',
         credentials: 'include',
         body: formData
@@ -65,7 +65,7 @@ const ProfileImageUpload = ({ onImageUpdate, currentImage, onClose }) => {
     try {
       console.log('🔄 Removing profile image with cookie authentication...');
 
-      const response = await fetch('http://localhost:3000/profile/remove-image', {
+      const response = await fetch('http://localhost:5000/profile/remove-image', {
         method: 'DELETE',
         credentials: 'include',
         headers: {
