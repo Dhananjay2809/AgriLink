@@ -22,7 +22,7 @@ const Notifications = () => {
   // Socket.io for real-time notifications
   useEffect(() => {
     if (currentUser?._id) {
-      socketRef.current = io('http://localhost:5000', {
+      socketRef.current = io(import.meta.env.VITE_API_URL, {
         withCredentials: true
       });
 

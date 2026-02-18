@@ -16,7 +16,7 @@ const SearchModal = ({ isOpen, onClose }) => {
   // Initialize socket connection
   useEffect(() => {
     if (currentUser) {
-      socketRef.current = io('http://localhost:5000', { withCredentials: true });
+      socketRef.current = io(import.meta.env.VITE_API_URL, { withCredentials: true });
       socketRef.current.emit('joinUser', currentUser._id);
 
       return () => socketRef.current?.disconnect();
