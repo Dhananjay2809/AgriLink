@@ -19,12 +19,21 @@ app.use(cookieParser());
 const server = http.createServer(app);
 initialiseSocket(server);
 
-app.use(cors(
-  {
-    origin: 'http://localhost:5173',
-    credentials: true,
-  }
-));
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://agrilink-backend-u30y.onrender.com"
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("CORS not allowed"));
+  },
+  credentials: true
+}));
 
 dotenv.config();
 // Middleware to parse JSON data
