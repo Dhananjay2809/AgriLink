@@ -21,7 +21,7 @@ initialiseSocket(server);
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://agrilink-backend-u30y.onrender.com"
+  "https://agrilink-7zio.onrender.com"
 ];
 
 app.use(cors({
