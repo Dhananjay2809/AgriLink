@@ -63,7 +63,7 @@ const handleCloseChat = () => {
     try {
       const token = document.cookie.split('; ').find(row => row.startsWith('token='))?.split('=')[1];
       
-      const response = await fetch("http://localhost:5000/profile", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/profile`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

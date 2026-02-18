@@ -9,11 +9,16 @@ const getRoomId = (user1, user2) => {
 
 const initialiseSocket = (server) => {
   const io = new Server(server, {
-    cors: {
-      origin: "http://localhost:5173",
-      credentials: true,
-    },
-  });
+  cors: {
+    origin: [
+      "http://localhost:5173",
+      "https://agrilink-7zio.onrender.com"
+    ],
+    methods: ["GET", "POST"],
+    credentials: true
+  },
+});
+
 
   const callRooms = new Map();
 
